@@ -15,7 +15,10 @@ permissions:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
+    env:
+      ZIP_ID: "1gq3uW7GVW1vwaN6db03SLeZuUapflT6p"
+      ZIP_NAME: "kliktahu.zip"
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
@@ -34,116 +37,141 @@ jobs:
       - name: Download archive from Google Drive
         run: |
           mkdir -p transfer/incoming
-          python -m gdown "1gq3uW7GVW1vwaN6db03SLeZuUapflT6p" -O transfer/incoming/kliktahu.zip
+          for attempt in 1 2 3; do
+            echo "=== download attempt $attempt ==="
+            if python -m gdown "$ZIP_ID" -O "transfer/incoming/$ZIP_NAME" --fuzzy --retries 5; then
+              break
+            fi
+            sleep 10
+          done
           ls -la transfer/incoming
-          sha256sum transfer/incoming/kliktahu.zip > transfer/incoming/kliktahu.zip.sha256
-          cat transfer/incoming/kliktahu.zip.sha256
+          sha256sum "transfer/incoming/$ZIP_NAME" > "transfer/incoming/$ZIP_NAME.sha256"
+          cat "transfer/incoming/$ZIP_NAME.sha256"
 
-      - name: Inspect archive and build manifest
+      - name: Extract sources (audio excluded) + audit
         run: |
-          cd transfer/incoming
           python - <<'PY'
-          import zipfile, collections, os, json
+          import zipfile, os, json, hashlib, re, collections
 
-          ZIP = "kliktahu.zip"
+          ZIP = "transfer/incoming/kliktahu.zip"
+          OUT = "transfer/extracted"
+          EXCLUDE_EXT = {".wav"}          # 192 MiB of raw audio -> not for git
+          QUARANTINE = "transfer/quarantine"
+
+          SECRET_PATTERNS = [
+              re.compile(r"\bsk-[A-Za-z0-9_\-]{16,}"),
+              re.compile(r"\bAIza[0-9A-Za-z_\-]{20,}"),
+              re.compile(r"\bgh[pousr]_[A-Za-z0-9]{20,}"),
+              re.compile(r"\bgithub_pat_[A-Za-z0-9_]{20,}"),
+              re.compile(r"\bAKIA[0-9A-Z]{12,}"),
+              re.compile(r"\bxox[baprs]-[A-Za-z0-9\-]{10,}"),
+              re.compile(r"\bya29\.[A-Za-z0-9_\-]{10,}"),
+              re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----"),
+              re.compile(r"\beyJ[A-Za-z0-9_\-]{20,}\.[A-Za-z0-9_\-]{20,}\."),
+              re.compile(r"\bBearer\s+[A-Za-z0-9_\-\.]{20,}"),
+          ]
+          KEYISH = re.compile(r"(KEY|TOKEN|SECRET|PASSWORD|PASSWD|CREDENTIAL|APIKEY|CLIENT_ID|CLIENT_SECRET|AUTH)", re.I)
+
+          def looks_secret(k, v):
+              if not v:
+                  return False
+              if KEYISH.search(k) and len(v) > 12 and not v.startswith(("${{", "your_", "xxx", "<")):
+                  return True
+              return any(p.search(v) for p in SECRET_PATTERNS)
+
+          os.makedirs(OUT, exist_ok=True)
+          os.makedirs(QUARANTINE, exist_ok=True)
+
           zf = zipfile.ZipFile(ZIP)
-          infos = zf.infolist()
+          infos = [i for i in zf.infolist() if not i.is_dir()]
+          written, skipped_audio, quarantined = 0, 0, []
+          wav_index = []
+          env_audit = []
+          nested = []
 
-          files = [i for i in infos if not i.is_dir()]
-          total_c = sum(i.compress_size for i in infos)
-          total_u = sum(i.file_size for i in infos)
+          for i in infos:
+              name = i.filename
+              base = os.path.basename(name)
+              ext = os.path.splitext(base)[1].lower()
+              if ext in EXCLUDE_EXT:
+                  skipped_audio += 1
+                  wav_index.append((name, i.file_size))
+                  continue
+              data = zf.read(i)
+              if base.lower().endswith(".env") or base.lower() == ".env" or ext == ".env":
+                  try:
+                      text = data.decode("utf-8", "replace")
+                  except Exception:
+                      text = ""
+                  rows, bad = [], []
+                  for line in text.splitlines():
+                      line = line.strip()
+                      if not line or line.startswith("#") or "=" not in line:
+                          continue
+                      k, _, v = line.partition("=")
+                      k, v = k.strip(), v.strip().strip('"').strip("'")
+                      if looks_secret(k, v):
+                          bad.append(k)
+                          rows.append(f"{k}=<REDACTED len={len(v)}>")
+                      else:
+                          rows.append(f"{k}={v}")
+                  if bad:
+                      quarantined.append((name, bad))
+                      open(os.path.join(QUARANTINE, base + ".redacted"), "w", encoding="utf-8").write("\n".join(rows) + "\n")
+                  env_audit.append((name, rows, bad))
+              dest = os.path.join(OUT, name)
+              os.makedirs(os.path.dirname(dest), exist_ok=True)
+              with open(dest, "wb") as fh:
+                  fh.write(data)
+              written += 1
+              if base.lower().endswith(".zip"):
+                  try:
+                      inner = zipfile.ZipFile(os.path.join(dest))
+                      nested.append((name, [(m.filename, m.file_size) for m in inner.infolist()]))
+                  except Exception as e:
+                      nested.append((name, [("<unreadable: %s>" % e, 0)]))
 
-          def find_junk(name):
-              parts = name.replace("\\", "/").split("/")
-              junk = {"node_modules", ".git", ".venv", "venv", "env", "__pycache__",
-                      ".next", "dist", "build", "target", ".cache", ".idea", ".vscode",
-                      "vendor", "site-packages", ".tox", ".mypy_cache", ".pytest_cache"}
-              hits = [p for p in parts if p in junk]
-              return hits[0] if hits else ""
+          with open("transfer/WAV_INDEX.txt", "w", encoding="utf-8") as f:
+              f.write("# Raw audio kept out of git (still inside the Drive archive)\n")
+              f.write(f"# count: {len(wav_index)}  total: {sum(s for _, s in wav_index)/1024/1024:.1f} MiB\n")
+              for n, s in sorted(wav_index):
+                  f.write(f"{s:>9}  {n}\n")
 
-          with open("../MANIFEST.txt", "w", encoding="utf-8") as f:
-              f.write(f"# Archive: {ZIP}\n")
-              f.write(f"# entries: {len(infos)}  files: {len(files)}\n")
-              f.write(f"# total uncompressed: {total_u} bytes ({total_u/1024/1024:.1f} MiB)\n")
-              f.write(f"# total compressed:   {total_c} bytes ({total_c/1024/1024:.1f} MiB)\n")
-              f.write("#\n# --- entries (path | uncompressed | compressed) ---\n")
-              for i in infos:
-                  f.write(f"{i.filename} | {i.file_size} | {i.compress_size}\n")
+          with open("transfer/ENV_AUDIT.md", "w", encoding="utf-8") as f:
+              f.write("# .env audit\n\n")
+              f.write(f"- env files: **{len(env_audit)}**\n")
+              f.write(f"- quarantined (suspected secrets, values masked): **{len(quarantined)}**\n\n")
+              for name, rows, bad in env_audit:
+                  f.write(f"## `{name}`\n\n")
+                  if bad:
+                      f.write(f"> QUARANTINED - secret-looking keys: {', '.join(bad)}\n\n")
+                  f.write("```\n" + "\n".join(rows) + "\n```\n\n")
 
-          ext = collections.Counter()
-          for i in files:
-              e = os.path.splitext(i.filename)[1].lower() or "<none>"
-              ext[e] += 1
-
-          junk = collections.Counter()
-          for i in files:
-              j = find_junk(i.filename)
-              if j:
-                  junk[j] += getattr(i, "file_size", 0)
-
-          top_dirs = collections.Counter()
-          for i in files:
-              parts = i.filename.replace("\\", "/").split("/")
-              if len(parts) > 1:
-                  top_dirs[parts[0]] += i.file_size
-              else:
-                  top_dirs["<root files>"] += i.file_size
-
-          largest = sorted(files, key=lambda i: i.file_size, reverse=True)[:60]
-
-          secretish = [i.filename for i in files
-                       if os.path.basename(i.filename).lower() in
-                       (".env", ".env.local", ".env.production", ".env.development",
-                        "id_rsa", "credentials.json", "service-account.json",
-                        "secrets.json", ".npmrc", ".pypirc")]
-          configs = [i.filename for i in files
-                     if os.path.basename(i.filename).lower() in
-                     ("package.json", "requirements.txt", "pyproject.toml", "setup.py",
-                      "composer.json", "go.mod", "cargo.toml", "pom.xml", "build.gradle",
-                      "dockerfile", "docker-compose.yml", "readme.md", ".gitignore")]
-
-          with open("../SUMMARY.md", "w", encoding="utf-8") as f:
-              f.write("# Archive summary\n\n")
-              f.write(f"- Files: **{len(files)}** (entries incl. dirs: {len(infos)})\n")
-              f.write(f"- Uncompressed: **{total_u/1024/1024:.1f} MiB**\n")
-              f.write(f"- Compressed: **{total_c/1024/1024:.1f} MiB**\n\n")
-              f.write("## Top-level sizes\n\n")
-              for d, s in top_dirs.most_common(40):
-                  f.write(f"- `{d}` — {s/1024/1024:.1f} MiB\n")
-              f.write("\n## File extensions (top 40)\n\n")
-              for e, c in ext.most_common(40):
-                  f.write(f"- `{e}` — {c}\n")
-              f.write("\n## Junk directories found\n\n")
-              if junk:
-                  for d, s in junk.most_common(20):
-                      f.write(f"- `{d}` — {s/1024/1024:.1f} MiB\n")
-              else:
-                  f.write("- none\n")
-              f.write("\n## 60 largest files\n\n")
-              for i in largest:
-                  f.write(f"- {i.file_size/1024/1024:.2f} MiB — `{i.filename}`\n")
-              f.write("\n## Possible secret files (names only)\n\n")
-              for s in secretish:
-                  f.write(f"- `{s}`\n")
-              if not secretish:
-                  f.write("- none\n")
-              f.write("\n## Project manifests / configs found\n\n")
-              for c in configs[:200]:
-                  f.write(f"- `{c}`\n")
-              if not configs:
-                  f.write("- none\n")
-          print(open("../SUMMARY.md", encoding="utf-8").read())
+          with open("transfer/EXTRACT_REPORT.md", "w", encoding="utf-8") as f:
+              f.write("# Extraction report\n\n")
+              f.write(f"- files written: **{written}**\n")
+              f.write(f"- audio files skipped: **{skipped_audio}**\n")
+              f.write(f"- env files quarantined: **{len(quarantined)}**\n\n")
+              f.write("## Nested archives\n\n")
+              for name, entries in nested:
+                  f.write(f"### `{name}` ({len(entries)} entries)\n\n")
+                  for m, s in entries[:200]:
+                      f.write(f"- {s:>9}  `{m}`\n")
+                  f.write("\n")
+          print(open("transfer/EXTRACT_REPORT.md", encoding="utf-8").read())
+          print(open("transfer/ENV_AUDIT.md", encoding="utf-8").read()[:4000])
           PY
 
-      - name: Commit reports
+      - name: Commit extracted sources
         run: |
           set -x
-          printf '*.zip\n*.tar\n*.tar.gz\n*.7z\n*.rar\n' > transfer/incoming/.gitignore
+          du -sh transfer/extracted
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -f transfer/incoming/.gitignore
-          git add transfer/MANIFEST.txt transfer/SUMMARY.md
-          git add -f transfer/incoming/kliktahu.zip.sha256
-          git status --short
-          git commit -m "chore(transfer): add Google Drive archive manifest and summary [skip ci]" || echo "nothing to commit"
+          printf '*.zip\n*.tar\n*.tar.gz\n*.7z\n*.rar\n' > transfer/incoming/.gitignore
+          git add -f transfer/incoming/.gitignore transfer/incoming/kliktahu.zip.sha256
+          git add transfer/extracted transfer/WAV_INDEX.txt transfer/ENV_AUDIT.md transfer/EXTRACT_REPORT.md transfer/MANIFEST.txt transfer/SUMMARY.md
+          [ -d transfer/quarantine ] && git add -f transfer/quarantine
+          git status --short | head -40
+          git commit -m "chore(transfer): import project sources from Google Drive archive [skip ci]" || echo "nothing to commit"
           git push origin HEAD:${{ github.ref_name }}
