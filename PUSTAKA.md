@@ -1,10 +1,13 @@
 # Pustaka KlikTahu - video & metadata per episode
 
-Semua hasil ada di GitHub ini (bukan di chat, bukan di workspace kerja):
+> **Catatan 6 Okt 2026 (pindah akun & repo):** video **tidak lagi disimpan di repo ini maupun di
+> Releases** — aturan keamanan akun, lihat `AGEN.md` §14. Hasil render diserahkan langsung ke pemilik
+> sebagai berkas MP4 (`dist/`). Nama rilis di daftar di bawah (mis. `KlikTahu_Ep49_Bintang-76`) adalah
+> riwayat dari repo/akun lama; tautannya tidak aktif di sini.
 
 | apa | di mana |
 |---|---|
-| **Video** (mp4 siap upload) | halaman **[Releases](../../releases)** - satu rilis per episode, selalu pakai rilis **terbaru** |
+| **Video** (mp4 siap upload) | diserahkan sebagai berkas — JANGAN di-commit ke repo |
 | **Metadata & teks siap tempel** | folder `pustaka/<episode>/` di repo ini |
 | **Peta kata kunci real-time** | `analisis/PETA_KATA_KUNCI.md` |
 

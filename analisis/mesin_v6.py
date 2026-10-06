@@ -41,7 +41,7 @@ from datetime import date, datetime, timedelta
 BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
 
-UA = {"User-Agent": "KlikTahuAnalisis/6.0 (github.com/elthsi09-ZERO-X/kliktahu-shorts) python-urllib",
+UA = {"User-Agent": "KlikTahuAnalisis/6.0 (github.com/chronoidchannel-stack/KlikTahu-) python-urllib",
       "Accept-Language": "id-ID,id;q=0.9,en;q=0.6"}
 UA_WEB = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                         "(KHTML, like Gecko) Chrome/126.0 Safari/537.36",

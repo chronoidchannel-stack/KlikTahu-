@@ -11,14 +11,16 @@ bahasa Indonesia, format 1080x1920 - 60 fps). Semua dikerjakan agen (AI) end-to-
 pencarian real-time -> naskah -> diagram animasi -> voice over TTS -> render paralel di GitHub Actions ->
 rilis otomatis -> pustaka teks siap-tempel.
 
-- **Branch kerja (tetap, jangan ganti):** `arena/01a0cc99-kliktahu-shorts` (sesi 23 Sep; sebelumnya 01a0bf42 - workflow sudah dipindah)
-- **Repo GitHub:** `elthsi09-ZERO-X/kliktahu-shorts` (publik). Jangan sentuh repo lain milik pemilik.
-- **Push = render otomatis.** Workflow `render.yml` terpicu oleh push yang mengubah file episode aktif/engine,
-  lalu hasilnya otomatis jadi **GitHub Release** (aset mp4 + metadata). Tidak perlu klik manual.
-- **Analisis = juga di CI.** Workflow `analisis.yml` terpicu push pada `analisis/**` (butuh internet penuh;
-  jaringan sandbox diblokir). Hasil di-commit balik dengan `[skip ci]`.
+- **Repo GitHub:** `chronoidchannel-stack/KlikTahu-`. Jangan sentuh repo lain milik pemilik.
+- **Branch kerja:** `main` (repo baru 6 Okt 2026; di repo/akun lama namanya `arena/01a0cc99-kliktahu-shorts`).
+- **GitHub hanya menyimpan kode + uji ringan.** Render video TIDAK di Actions — jalankan lokal lewat
+  `tools/render_lokal.sh`. Baca §14 (aturan keamanan akun) sebelum mengubah apa pun soal workflow.
+- **Hasil video diserahkan langsung** ke pemilik sebagai berkas MP4 (folder `dist/`), bukan lewat Release.
 
 ## 2. Status terkini (perbarui baris ini setiap selesai episode)
+
+> **MULAI DARI SINI:** keadaan terbaru proyek ada di **§14 (6 Okt 2026 — pindah akun & repo, render tidak lagi
+> di GitHub Actions)**. Catatan rilis Ep24-Ep49 di bawah tetap berlaku sebagai riwayat isi episode.
 
 ### ATURAN KERAS (pelajaran 22 Sep, user marah)
 1. **1 episode = 1 render = 1 rilis.** SEMUA aset (naskah, VO, visual, METADATA.md, pustaka)
@@ -106,7 +108,7 @@ rilis otomatis -> pustaka teks siap-tempel.
   termometer 27 C + laut dalam, paus pindah, TV + stempel FIKSI + pie 73%). SFX baru `gelembung`, `gigit` (20 bunyi).
   QC lokal: VO 10/10 BERSIH, check_layout bersih, audio master OK, qc_mp4 uji korelasi 1,0000.
   CATATAN: sandbox bisa ter-reset ke commit dasar di antara giliran -> file yang belum di-commit HILANG.
-  Setelah reset: `git fetch origin arena/01a0cc99-kliktahu-shorts && git reset --hard FETCH_HEAD` + pip install -r requirements.txt.
+  Setelah reset: `git fetch origin main && git reset --hard FETCH_HEAD` + pip install -r requirements.txt.
   Episode berikutnya = **Ep49** (Ep48 jantung selesai). Papan v6 LIVE setelah Ep46: #1 petir 42,6,
   #2 uban & rambut 42,3, #3 jantung & dada 42,1, #4 pelangi 41,2, #5 cegukan 39,3.
 - **[TUNTAS 23 Sep, sesi 01a0cc99] Ep45 LANGIT GELAP (matahari)** - rilis `KlikTahu_Ep45_Langit-70` (run 35832816444,
@@ -354,17 +356,19 @@ rilis otomatis -> pustaka teks siap-tempel.
 1. Kram & kesemutan (skor 83,1) 2. Hujan & awan putih (80,0) 3. Listrik & magnet (66,9) 4. Cegukan (65,5)
 5. Antrean lama yang masih kuat: uban (91,1), megalodon (76,4), Gunung Padang/Lawu (79,2), petir (54,7), aurora (46,0).
 
-## 7. Perintap cepat
+## 7. Perintah cepat (keadaan baru: render LOKAL, bukan Actions)
 ```bash
-git push origin HEAD:arena/01a0cc99-kliktahu-shorts   # render otomatis (episode aktif)
-gh run list --limit 3                             # lihat run
-gh run watch <run-id> --exit-status               # pantau sampai selesai
-gh release list --limit 3                         # hasil akhir
-gh api repos/elthsi09-ZERO-X/kliktahu-shorts/actions/jobs/<job-id>/logs   # log QC merge
+pip install -r requirements.txt                    # sekali per sandbox
+tools/render_lokal.sh shorts ep49_bintang prep     # cek cepat: audio + timeline + tata letak
+tools/render_lokal.sh shorts ep49_bintang          # render penuh -> dist/
+tools/render_lokal.sh long v02_laut_dalam          # video panjang 16:9
+python mesin_v11.py && python diagrams.py && python sfx.py   # selftest mesin
+git add -A && git commit -m "..." && git push origin main    # simpan kode (tanpa MP4)
+gh run list --limit 3                              # lihat uji ringan (selftest.yml)
 ```
-Catatan lingkungan: unduhan biner besar dari release-assets terblokir jaringan sandbox (verifikasi aset via
-API cukup); `suggestqueries` dari sandbox diblokir -> analisis dijalankan di Actions; `ffprobe` tidak ada,
-pakai ffmpeg dari `imageio_ffmpeg.get_ffmpeg_exe()`.
+Catatan lingkungan sandbox: `suggestqueries` Google/YouTube diblokir -> sapuan analisis real-time harus
+dijalankan di mesin yang punya internet penuh (atau pakai alat web search agen); `ffprobe` tidak ada, pakai
+ffmpeg dari `imageio_ffmpeg.get_ffmpeg_exe()`; jaringan sandbox ber-allowlist (GitHub/PyPI/npm saja).
 
 ## 8. Masalah & jebakan yang pernah terjadi (jangan diulang)
 - **Reset sandbox bisa menggulung .git lokal** (terjadi saat Ep29, 21 Sep): HEAD kembali ke commit dasar clone
@@ -520,6 +524,10 @@ Poppins-Bold = 0.87*fsz, pusat visual 0.025*fsz di atas anchor mm); ImageChops.s
 radius GaussianBlur harus float() biasa.
 
 ## 13. Keamanan & HEMAT ACTIONS (24 Sep 2026) - WAJIB setelah akun GitHub di-flag
+
+> Sebagian isi bagian ini sudah digantikan oleh **§14** (6 Okt 2026): render video tidak lagi di GitHub
+> Actions dan workflow render sudah dipindah ke `docs/arsip/workflows/`. Bagian ini tetap penting sebagai
+> riwayat penyebab akun lama di-flag.
 Kejadian: 24 Sep ~23.00 WIB akun `elthsi09-ZERO-X` di-flag GitHub (profil/repo 404 publik, API 404,
 "Actions has been disabled for this user"); git push/pull tetap jalan. User mengajukan tiket ke GitHub Support.
 Dugaan pemicu: beban Actions besar (12-16 runner paralel per render + analisis tiap 6 jam + commit bot) dan
@@ -533,3 +541,44 @@ Aturan sejak ini:
 - `.gitignore` menolak pola rahasia (.env, *.pem, *.key, credentials*.json, .netrc, dll). Pindai rahasia: bersih.
 - Kalau repo dijadikan PRIVAT: Actions memakai kuota menit (paket Free 2.000 menit/bulan). Perkiraan: render
   Shorts ~60-90 menit-runner, Long ~100-140, analisis harian ~5 -> +-15 render/bulan masih muat.
+
+---
+
+## 14. PINDAH AKUN & REPO — RENDER TIDAK LAGI DI GITHUB ACTIONS (6 Okt 2026)
+
+**Alasan:** akun GitHub lama `elthsi09-ZERO-X` sudah di-flag (lihat §13). Pemilik membuat akun baru
+`chronoidchannel-stack` dan repo baru **`chronoidchannel-stack/KlikTahu-`**. Seluruh mesin (kode, naskah,
+metadata, data analisis) dipindahkan ke repo ini; yang TIDAK ikut: audio mentah 192 MiB dan semua video.
+
+**Aturan baru yang WAJIB dipatuhi (ini yang menjaga akun tidak di-flag lagi):**
+1. **Render video tidak di GitHub Actions.** Render lokal: `tools/render_lokal.sh <shorts|long> <slug>`.
+   Runner gratis GitHub hanya untuk membangun/menguji perangkat lunak, bukan komputasi umum.
+2. **Jangan simpan MP4** di repo maupun di Releases. `.gitignore` sudah memblokir `*.mp4`, `dist/`,
+   `build/`, `frames*/`, `parts/`, `/timeline.json`, `/content.json`, `audio*_proc/`.
+3. **Actions hanya uji ringan** (< 5 menit, tanpa render frame, tanpa cron):
+   `.github/workflows/selftest.yml` (selftest mesin + analisis `--uji` + cek berkas wajib).
+   Workflow render lama ada di `docs/arsip/workflows/` — JANGAN dihidupkan kembali tanpa izin pemilik.
+4. **Jangan simpan rahasia apa pun** di repo/chat: token, kunci API, `.env` asli, kredensial.
+   `.gitignore` menolak `.env*`, `*.pem`, `*.key`, `*secret*`, `credentials*.json`, `.netrc`.
+5. **Jangan hubungkan aplikasi AI pihak ketiga** lain ke repo ini (aplikasi bot yang push beruntun
+   termasuk pemicu flag sebelumnya).
+6. **Jangan push beruntun**; kumpulkan perubahan jadi satu commit bermakna. Pakai `[skip ci]` untuk
+   perubahan yang tidak perlu diuji.
+7. **Audio mentah tidak di repo** (268 WAV = 192 MiB). Daftar berkas + ukurannya: `docs/audio-manifest.md`.
+   Salinan asli: arsip Google Drive `kliktahu.zip` -> kembalikan ke `episodes/<slug>/audio_raw/` sebelum render.
+8. **Sandbox bisa ter-reset:** perbarui AGEN.md + commit tiap tahap selesai. Jangan menunggu akhir.
+
+**Keadaan mesin di repo ini (per 6 Okt 2026):**
+- Struktur mengikuti cetak biru §4 prompt pemilik: mesin di akar repo, `episodes/` (26 episode Ep24-Ep49),
+  `pustaka/` (teks siap tempel), `long/` (Long01 lubang hitam, Long02 laut dalam), `analisis/` (v3-v6 + data),
+  `fonts/` (Poppins + OFL), `docs/` (prompt proyek, manifest audio, atribusi, arsip workflow).
+- Dependensi dinaikkan ke versi mutakhir dan **sudah diuji lulus** bersama kode ini:
+  pillow 12.3.0, numpy 2.4.6 (2.5.3 di Python 3.12+), imageio-ffmpeg 0.6.0. Batasnya ada di `requirements.txt`.
+- Uji yang sudah dijalankan (lulus): `mesin_v11.py` (71 adegan, 6 transisi, 19 event), `diagrams.py`
+  (selftest semua visual), `sfx.py` (24 bunyi), `analisis/{pemeta_peluang,mesin_v5,mesin_v6,sapuan_mendalam}.py --uji`.
+- Lisensi repo: hak cipta dilindungi (`LICENSE`). Atribusi pihak ketiga: font Poppins (SIL OFL 1.1) dan
+  citra M87* EHT (CC BY 4.0) -> `docs/ATTRIBUSI.md`.
+- **Belum ada episode baru setelah Ep49 / Long02.** Episode berikutnya: **Ep50** (Shorts) dan **Long03**,
+  topik dari antrean analisis (piramida, lubang hitam Shorts, ular, aurora, es & salju, uban, cegukan, pelangi).
+  Tunggu perintah pemilik; untuk episode baru buat `episodes/ep50_<slug>/` + `mesin_v11_ep50.py` (pola Ep43-49)
+  lalu render lokal.
