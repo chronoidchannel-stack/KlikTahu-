@@ -1,0 +1,30 @@
+# artefak render (dibuat ulang tiap kali)
+build/
+frames/
+parts/
+audio/
+audio_proc/
+audio_tmp/
+dist/
+*.mp4
+__pycache__/
+*.pyc
+# naskah & timeline kerja (dibuat dari episodes/ + audio_raw/)
+/content.json
+/timeline.json
+# dokumen pribadi
+docs/*.local
+
+# keamanan: jangan pernah commit rahasia / kredensial
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*token*.txt
+*secret*
+credentials*.json
+.netrc
+.git-credentials
+# unggahan & pratinjau lokal
+uploads/

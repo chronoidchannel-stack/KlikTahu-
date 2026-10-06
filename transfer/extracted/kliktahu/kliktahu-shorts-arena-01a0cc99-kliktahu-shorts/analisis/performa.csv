@@ -1,0 +1,8 @@
+# Isi dari YouTube Studio 48 jam setelah unggah. Kolom: episode,views_48jam,rata_ditonton_persen,suka,komentar,share
+# Contoh: Ep41,12500,78,640,85,120   (angka tanpa titik ribuan)
+# mesin_v6.py memakai kolom views untuk menghitung indeks performa per pilar niche.
+episode,views_48jam,rata_ditonton_persen,suka,komentar,share
+Ep38,,,,,
+Ep39,,,,,
+Ep40,,,,,
+Ep41,,,,,
