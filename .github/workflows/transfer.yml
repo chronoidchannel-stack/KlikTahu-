@@ -137,8 +137,13 @@ jobs:
 
       - name: Commit reports
         run: |
+          set -x
+          printf '*.zip\n*.tar\n*.tar.gz\n*.7z\n*.rar\n' > transfer/incoming/.gitignore
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A transfer
+          git add -f transfer/incoming/.gitignore
+          git add transfer/MANIFEST.txt transfer/SUMMARY.md
+          git add -f transfer/incoming/kliktahu.zip.sha256
+          git status --short
           git commit -m "chore(transfer): add Google Drive archive manifest and summary [skip ci]" || echo "nothing to commit"
           git push origin HEAD:${{ github.ref_name }}
