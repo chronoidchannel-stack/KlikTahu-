@@ -1,0 +1,144 @@
+name: Transfer source from Google Drive
+
+on:
+  push:
+    branches:
+      - arena/548c5470-kliktahu
+    paths:
+      - ".github/workflows/transfer.yml"
+      - "transfer/trigger.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install gdown
+        run: python -m pip install --upgrade gdown
+
+      - name: Download archive from Google Drive
+        run: |
+          mkdir -p transfer/incoming
+          python -m gdown "1gq3uW7GVW1vwaN6db03SLeZuUapflT6p" -O transfer/incoming/kliktahu.zip
+          ls -la transfer/incoming
+          sha256sum transfer/incoming/kliktahu.zip > transfer/incoming/kliktahu.zip.sha256
+          cat transfer/incoming/kliktahu.zip.sha256
+
+      - name: Inspect archive and build manifest
+        run: |
+          cd transfer/incoming
+          python - <<'PY'
+          import zipfile, collections, os, json
+
+          ZIP = "kliktahu.zip"
+          zf = zipfile.ZipFile(ZIP)
+          infos = zf.infolist()
+
+          files = [i for i in infos if not i.is_dir()]
+          total_c = sum(i.compress_size for i in infos)
+          total_u = sum(i.file_size for i in infos)
+
+          def find_junk(name):
+              parts = name.replace("\\", "/").split("/")
+              junk = {"node_modules", ".git", ".venv", "venv", "env", "__pycache__",
+                      ".next", "dist", "build", "target", ".cache", ".idea", ".vscode",
+                      "vendor", "site-packages", ".tox", ".mypy_cache", ".pytest_cache"}
+              hits = [p for p in parts if p in junk]
+              return hits[0] if hits else ""
+
+          with open("../MANIFEST.txt", "w", encoding="utf-8") as f:
+              f.write(f"# Archive: {ZIP}\n")
+              f.write(f"# entries: {len(infos)}  files: {len(files)}\n")
+              f.write(f"# total uncompressed: {total_u} bytes ({total_u/1024/1024:.1f} MiB)\n")
+              f.write(f"# total compressed:   {total_c} bytes ({total_c/1024/1024:.1f} MiB)\n")
+              f.write("#\n# --- entries (path | uncompressed | compressed) ---\n")
+              for i in infos:
+                  f.write(f"{i.filename} | {i.file_size} | {i.compress_size}\n")
+
+          ext = collections.Counter()
+          for i in files:
+              e = os.path.splitext(i.filename)[1].lower() or "<none>"
+              ext[e] += 1
+
+          junk = collections.Counter()
+          for i in files:
+              j = find_junk(i.filename)
+              if j:
+                  junk[j] += getattr(i, "file_size", 0)
+
+          top_dirs = collections.Counter()
+          for i in files:
+              parts = i.filename.replace("\\", "/").split("/")
+              if len(parts) > 1:
+                  top_dirs[parts[0]] += i.file_size
+              else:
+                  top_dirs["<root files>"] += i.file_size
+
+          largest = sorted(files, key=lambda i: i.file_size, reverse=True)[:60]
+
+          secretish = [i.filename for i in files
+                       if os.path.basename(i.filename).lower() in
+                       (".env", ".env.local", ".env.production", ".env.development",
+                        "id_rsa", "credentials.json", "service-account.json",
+                        "secrets.json", ".npmrc", ".pypirc")]
+          configs = [i.filename for i in files
+                     if os.path.basename(i.filename).lower() in
+                     ("package.json", "requirements.txt", "pyproject.toml", "setup.py",
+                      "composer.json", "go.mod", "cargo.toml", "pom.xml", "build.gradle",
+                      "dockerfile", "docker-compose.yml", "readme.md", ".gitignore")]
+
+          with open("../SUMMARY.md", "w", encoding="utf-8") as f:
+              f.write("# Archive summary\n\n")
+              f.write(f"- Files: **{len(files)}** (entries incl. dirs: {len(infos)})\n")
+              f.write(f"- Uncompressed: **{total_u/1024/1024:.1f} MiB**\n")
+              f.write(f"- Compressed: **{total_c/1024/1024:.1f} MiB**\n\n")
+              f.write("## Top-level sizes\n\n")
+              for d, s in top_dirs.most_common(40):
+                  f.write(f"- `{d}` — {s/1024/1024:.1f} MiB\n")
+              f.write("\n## File extensions (top 40)\n\n")
+              for e, c in ext.most_common(40):
+                  f.write(f"- `{e}` — {c}\n")
+              f.write("\n## Junk directories found\n\n")
+              if junk:
+                  for d, s in junk.most_common(20):
+                      f.write(f"- `{d}` — {s/1024/1024:.1f} MiB\n")
+              else:
+                  f.write("- none\n")
+              f.write("\n## 60 largest files\n\n")
+              for i in largest:
+                  f.write(f"- {i.file_size/1024/1024:.2f} MiB — `{i.filename}`\n")
+              f.write("\n## Possible secret files (names only)\n\n")
+              for s in secretish:
+                  f.write(f"- `{s}`\n")
+              if not secretish:
+                  f.write("- none\n")
+              f.write("\n## Project manifests / configs found\n\n")
+              for c in configs[:200]:
+                  f.write(f"- `{c}`\n")
+              if not configs:
+                  f.write("- none\n")
+          print(open("../SUMMARY.md", encoding="utf-8").read())
+          PY
+
+      - name: Commit reports
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A transfer
+          git commit -m "chore(transfer): add Google Drive archive manifest and summary [skip ci]" || echo "nothing to commit"
+          git push origin HEAD:${{ github.ref_name }}
