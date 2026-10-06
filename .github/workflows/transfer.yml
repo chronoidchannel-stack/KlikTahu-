@@ -34,17 +34,43 @@ jobs:
 
       - name: Download archive from Google Drive
         run: |
+          set -uo pipefail
           mkdir -p transfer/incoming
+          ZIP=transfer/incoming/kliktahu.zip
+          ID=1gq3uW7GVW1vwaN6db03SLeZuUapflT6p
+          rm -f "$ZIP"
+
+          is_zip() {
+            [ -s "$ZIP" ] || return 1
+            python -c "import zipfile,sys; zipfile.ZipFile(sys.argv[1]).infolist()" "$ZIP"
+          }
+
+          got=0
           for attempt in 1 2 3; do
-            echo "=== download attempt $attempt ==="
-            if python -m gdown "1gq3uW7GVW1vwaN6db03SLeZuUapflT6p" -O transfer/incoming/kliktahu.zip --fuzzy --retries 5; then
-              break
-            fi
-            sleep 10
+            echo "=== attempt $attempt: curl confirm flow ==="
+            curl -sSL --retry 3 --retry-delay 5 -c /tmp/cj -b /tmp/cj \
+              "https://drive.usercontent.google.com/download?id=$ID&export=download&confirm=t" \
+              -o "$ZIP"
+            if is_zip; then got=1; break; fi
+            echo "curl result was not a valid zip; retrying"
+            rm -f "$ZIP"
+            sleep 15
           done
-          ls -la transfer/incoming
-          sha256sum transfer/incoming/kliktahu.zip > transfer/incoming/kliktahu.zip.sha256
-          cat transfer/incoming/kliktahu.zip.sha256
+
+          if [ "$got" = 0 ]; then
+            for attempt in 1 2; do
+              echo "=== attempt $attempt: gdown ==="
+              python -m gdown "$ID" -O "$ZIP" --retries 10 || true
+              if is_zip; then got=1; break; fi
+              rm -f "$ZIP"
+              sleep 15
+            done
+          fi
+
+          [ "$got" = 1 ] || { echo "download failed"; exit 1; }
+          ls -la "$ZIP"
+          sha256sum "$ZIP" > "$ZIP.sha256"
+          cat "$ZIP.sha256"
 
       - name: Extract sources (audio excluded) and audit env files
         run: python tools/transfer_extract.py
