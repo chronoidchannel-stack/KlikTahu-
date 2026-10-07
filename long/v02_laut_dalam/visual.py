@@ -2281,27 +2281,28 @@ def v02_naik(img, C):
                 cap = ["TEKANAN SEBERAT MOBIL", "DI UJUNG JARI"]
             teks(img, x, 720 + dy, cap[0], 30, TEKS, a * q, name=FB)
             teks(img, x, 764 + dy, cap[1], 30, TEKS, a * q, name=FB)
-    # ---- shot C: baru seperempat dasar laut terpetakan rinci
+    # ---- shot C: 28,7% dasar laut terpetakan dengan standar modern (data April 2026)
     a = C.win(t_anh, t_kal, 0.5, 0.5)
     if a > 0.01:
         t_sia = C.w("siapa", 1, -0.3)
         a1 = a * (1 - 0.8 * clamp((tl - t_sia) / 0.6))
-        teks(img, CX, 170, "ANEHNYA, SAMPAI HARI INI...", 46, TEKS, a1 * clamp((tl - t_anh) / 0.4), name=FB)
+        teks(img, CX, 170, "DATA TERBARU, APRIL 2026", 46, TEKS, a1 * clamp((tl - t_anh) / 0.4), name=FB)
         gx0, gy0, nx, ny, c = CX - 620, 260, 24, 10, 44
-        ts = C.tt("seperempat", 1, -0.3)
+        ts = C.tt("dua puluh delapan koma tujuh", 1, -0.3)
         rng = random.Random(12)
         sel = [(i, j) for i in range(nx) for j in range(ny)]
         rng.shuffle(sel)
-        on = set(sel[:int(len(sel) * 0.25 * clamp(ts / 1.5))]) if ts > 0 else set()
+        on = set(sel[:int(len(sel) * 0.287 * clamp(ts / 1.5))]) if ts > 0 else set()
         for i in range(nx):
             for j in range(ny):
                 col = (60, 180, 230) if (i, j) in on else (22, 34, 60)
                 D.rrect_on(img, gx0 + i * 52, gy0 + j * c, gx0 + i * 52 + 46, gy0 + j * c + 38, 5, col, a1 * 0.92)
-        angka(img, CX - 300, 800, 25, ts, fsz=110, suf="%", alpha=a1, col=SIAN, dur=1.5, sub="DIPETAKAN SECARA RINCI", subfsz=26)
-        tb = C.tt("sebagian", 1, -0.3)
+        angka(img, CX - 300, 800, 28.7, ts, fsz=110, des=1, suf="%", alpha=a1, col=SIAN, dur=1.5,
+              sub="STANDAR MODERN · 2026", subfsz=26)
+        tb = C.tt("lebih dari tujuh puluh satu", 1, -0.3)
         if tb > 0:
-            teks(img, CX + 300, 790, "75%", 110, MERAH, a1 * clamp(tb / 0.4), name=FB)
-            teks(img, CX + 300, 890, "BELUM PERNAH KITA LIHAT DENGAN JELAS", 24, REDUP, a1 * clamp(tb / 0.4), name=FS)
+            teks(img, CX + 300, 790, "71,3%", 110, MERAH, a1 * clamp(tb / 0.4), name=FB)
+            teks(img, CX + 300, 890, "BELUM TERCANTUM DI PETA MODERN", 24, REDUP, a1 * clamp(tb / 0.4), name=FS)
         tq = tl - t_sia
         if tq > 0:
             aq = a * clamp(tq / 0.5)
@@ -2425,7 +2426,8 @@ BEATS = {
     "v02_naik": [("naik", 1, 0.0, "riser", 0.8), ("naik", 1, 0.4, "whoosh", 0.9), ("perjalanan", 1, 0.6, "gelembung", 0.8),
                  ("lima", 1, -0.3, "swish", 0.6), ("zona", 1, -0.3, "pop", 0.7), ("zona", 2, -0.3, "pop", 0.7),
                  ("zona", 3, -0.3, "pop", 0.7), ("zona", 4, -0.3, "pop", 0.7), ("zona", 5, -0.3, "pop", 0.7),
-                 ("anehnya", 1, -0.3, "swish", 0.7), ("seperempat", 1, -0.3, "riser", 0.5), ("sebagian", 1, -0.3, "impact", 0.7),
+                 ("anehnya", 1, -0.3, "swish", 0.7), ("dua puluh delapan koma tujuh", 1, -0.3, "riser", 0.5),
+                 ("lebih dari tujuh puluh satu", 1, -0.3, "impact", 0.7),
                  ("siapa", 1, -0.3, "boom", 0.6), ("menunggu", 1, -0.3, "kilau", 0.6), ("kalau", 1, -0.3, "swish", 0.7),
                  ("kliktahu", 1, -0.5, "pop", 0.8), ("kliktahu", 1, 0.6, "click", 0.9), ("tulis", 1, -0.4, "pop", 0.7),
                  ("berikutnya", 1, -0.3, "ding", 0.7)],

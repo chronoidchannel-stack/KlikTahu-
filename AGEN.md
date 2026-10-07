@@ -610,3 +610,18 @@ metadata, data analisis) dipindahkan ke repo ini; yang TIDAK ikut: audio mentah 
 - Batasan jaminan: praktik ini mengurangi risiko ukuran, aktivitas, dan penyalahgunaan Actions; tidak ada cara
   untuk menjamin akun tidak pernah ditandai. Jangan mengakali kontrol platform; jika ada enforcement, hubungi
   GitHub Support melalui jalur resmi.
+
+---
+
+## 16. PENYIMPANAN DRIVE & PEMBARUAN MATERI PRODUKSI (7 Okt 2026)
+
+- Folder produksi Drive: [KlikTahu_Produksi](https://drive.google.com/drive/folders/1j7aMh0FecG7TwpekChWrQodNiMbdxFUg) dengan subfolder Shorts, Long, Metadata (Shorts/Long), Thumbnails (Shorts/Long), Assets, dan Project_Docs.
+- Upload yang tersedia sekarang: arsip metadata Shorts Ep24–Ep49 (26 `METADATA.md` + 26 `SIAP_TEMPEL.md`), metadata Long01/Long02, thumbnail Long01/Long02 JPG 1280×720, serta `INDEKS_PRODUKSI.md`.
+- Draf cover Ep49 adalah still 9:16 dari pratinjau visual dengan timeline perkiraan tanpa audio; bukan frame video final. Jangan tandai sebagai thumbnail final sebelum dicocokkan dengan render tersinkron.
+- **Belum ada MP4 final yang tersedia di workspace atau ditemukan di Drive.** Arsip WAV di Drive masih belum berhasil diunduh; ZIP sekitar 165 MB melebihi transfer konektor 100 MB. Jangan mengklaim audio/video sudah dipulihkan atau dirender, dan jangan mengakali batas transfer.
+- Audit materi Long02 menggunakan sumber resmi terbaru yang ditemukan: Seabed 2030/GEBCO, 20 Apr 2026, melaporkan 28,7% dasar laut dipetakan dengan standar modern ([tautan](https://seabed2030.org/2026/04/20/global-seabed-mapping-reaches-new-milestone-as-five-million-square-kilometres-added-in-a-year/)). Narasi adegan `v02_naik`, visual (28,7% / 71,3%), metadata, dan beat SFX diperbarui 7 Okt 2026. WAV lama `v02_naik` sudah tidak sinkron; wajib rekam/generasikan ulang sebelum render. Durasi 10:12 adalah rujukan audio lama, bukan klaim durasi final.
+- Dependensi diperiksa ulang dan dipasang di `.venv`: Pillow 12.3.0; NumPy 2.4.6 untuk Python 3.11 (NumPy 2.5.3 tersedia untuk Python 3.12+); imageio-ffmpeg 0.6.0. Batas `requirements.txt` sudah memilih latest stabil yang kompatibel; tidak perlu menambah dependensi.
+- Uji stdlib kini 9 unittest (6 pemulihan + 3 sinkronisasi sumber/narasi/visual Long02); audit 227 file, selftest motion/diagram/SFX/analisis, `py_compile`, dan satu frame QA Long02 lolos. Frame memakai timeline estimasi untuk inspeksi statis, bukan render final.
+- Poster pratinjau Short Ep49 dan dua thumbnail Long dibuat dengan engine repo. Snapshot generasi berada lokal di `dist/` (diabaikan Git); hanya thumbnail final/draft yang dipilih, metadata, dan indeks yang diunggah ke Drive.
+- PR #2 tetap OPEN; perubahan Long02 ini perlu satu commit di branch sesi dan akan masuk ke PR tersebut. Linear KLI-5 tetap menunggu pilihan pemilik untuk topik Ep50/Long03. Jangan menyatakan episode baru telah dibuat.
+- Urutan lanjut: pulihkan audio ZIP lewat unduhan yang diizinkan, regenerate `v02_naik.wav`, render Long/Short secara lokal, lakukan QC, lalu unggah MP4 + metadata + thumbnail final ke subfolder Drive. Keamanan akun GitHub tetap diutamakan: tanpa render Actions, tanpa MP4/ZIP/WAV mentah di GitHub, satu commit/push bermakna.
