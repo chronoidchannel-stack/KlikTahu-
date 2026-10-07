@@ -1,11 +1,16 @@
 # Manifest audio mentah (TIDAK disimpan di repo)
 
-Repo ini **tidak** memuat audio mentah. Alasannya: 268 berkas WAV = 192 MiB,
-membuat repo berat dan berisiko untuk akun GitHub (lihat `AGEN.md` §14).
+Repo ini **tidak** memuat audio mentah. Arsip Drive `kliktahu.zip` berukuran
+sekitar 157 MB dan berisi 268 WAV (192.2 MiB setelah diekstrak). ZIP dan WAV
+sengaja tetap di penyimpanan eksternal/lokal: ZIP melebihi batas 100 MiB per file
+GitHub dan media mentah tidak diperlukan untuk menyimpan kode atau menjalankan CI.
 
-Audio aslinya ada di arsip Google Drive `kliktahu.zip` (folder `audio_raw/` per episode).
-Letakkan kembali berkasnya di `episodes/<slug>/audio_raw/` (atau `long/<slug>/audio_raw/`)
-sebelum menjalankan `tools/render_lokal.sh`.
+Untuk mengembalikan WAV secara lokal, unduh ZIP ke komputer pribadi lalu jalankan
+`python tools/restore_audio.py /path/ke/kliktahu.zip --dry-run` dan, bila lolos,
+`python tools/restore_audio.py /path/ke/kliktahu.zip`. Alat hanya mengekstrak
+berkas yang terdaftar di manifest ke `episodes/<slug>/audio_raw/` atau
+`long/<slug>/audio_raw/`; hasil serta ZIP diabaikan Git (`.gitignore`). Jangan
+memaksa file tersebut masuk Git dengan `git add -f`.
 
 Total: **268 berkas**, **192.2 MiB**
 

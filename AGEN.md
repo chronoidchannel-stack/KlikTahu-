@@ -6,21 +6,22 @@
 ---
 
 ## 1. Apa ini
-Repo **kliktahu-shorts** = mesin produksi channel YouTube **KlikTahu** (Shorts edukasi sains & misteri
-bahasa Indonesia, format 1080x1920 - 60 fps). Semua dikerjakan agen (AI) end-to-end: riset topik dari data
-pencarian real-time -> naskah -> diagram animasi -> voice over TTS -> render paralel di GitHub Actions ->
-rilis otomatis -> pustaka teks siap-tempel.
+Repo **chronoidchannel-stack/KlikTahu-** = mesin produksi channel YouTube **KlikTahu** (Shorts edukasi
+sains & misteri bahasa Indonesia, format 1080x1920 - 60 fps). Alur proyek: riset topik -> naskah -> diagram
+animasi -> voice over TTS -> render video lokal -> pustaka teks siap-tempel.
 
 - **Repo GitHub:** `chronoidchannel-stack/KlikTahu-`. Jangan sentuh repo lain milik pemilik.
-- **Branch kerja:** `main` (repo baru 6 Okt 2026; di repo/akun lama namanya `arena/01a0cc99-kliktahu-shorts`).
+- **Branch default repo:** `main`; gunakan branch kerja yang dialokasikan untuk sesi agen dan jangan
+  mengganti branch tanpa instruksi.
 - **GitHub hanya menyimpan kode + uji ringan.** Render video TIDAK di Actions — jalankan lokal lewat
-  `tools/render_lokal.sh`. Baca §14 (aturan keamanan akun) sebelum mengubah apa pun soal workflow.
+  `tools/render_lokal.sh`. Baca §14-§15 (aturan keamanan akun dan media) sebelum mengubah workflow.
 - **Hasil video diserahkan langsung** ke pemilik sebagai berkas MP4 (folder `dist/`), bukan lewat Release.
 
 ## 2. Status terkini (perbarui baris ini setiap selesai episode)
 
-> **MULAI DARI SINI:** keadaan terbaru proyek ada di **§14 (6 Okt 2026 — pindah akun & repo, render tidak lagi
-> di GitHub Actions)**. Catatan rilis Ep24-Ep49 di bawah tetap berlaku sebagai riwayat isi episode.
+> **MULAI DARI SINI:** keadaan terbaru proyek ada di **§15 (7 Okt 2026 — pemulihan audio lokal,
+> dependensi dan audit repo)**; aturan perpindahan akun/render di §14 tetap berlaku. Catatan rilis Ep24-Ep49
+> di bawah tetap berlaku sebagai riwayat isi episode.
 
 ### ATURAN KERAS (pelajaran 22 Sep, user marah)
 1. **1 episode = 1 render = 1 rilis.** SEMUA aset (naskah, VO, visual, METADATA.md, pustaka)
@@ -550,7 +551,7 @@ Aturan sejak ini:
 `chronoidchannel-stack` dan repo baru **`chronoidchannel-stack/KlikTahu-`**. Seluruh mesin (kode, naskah,
 metadata, data analisis) dipindahkan ke repo ini; yang TIDAK ikut: audio mentah 192 MiB dan semua video.
 
-**Aturan baru yang WAJIB dipatuhi (ini yang menjaga akun tidak di-flag lagi):**
+**Mitigasi risiko yang WAJIB dipatuhi (tidak menjamin keputusan atau flag dari platform):**
 1. **Render video tidak di GitHub Actions.** Render lokal: `tools/render_lokal.sh <shorts|long> <slug>`.
    Runner gratis GitHub hanya untuk membangun/menguji perangkat lunak, bukan komputasi umum.
 2. **Jangan simpan MP4** di repo maupun di Releases. `.gitignore` sudah memblokir `*.mp4`, `dist/`,
@@ -582,3 +583,30 @@ metadata, data analisis) dipindahkan ke repo ini; yang TIDAK ikut: audio mentah 
   topik dari antrean analisis (piramida, lubang hitam Shorts, ular, aurora, es & salju, uban, cegukan, pelangi).
   Tunggu perintah pemilik; untuk episode baru buat `episodes/ep50_<slug>/` + `mesin_v11_ep50.py` (pola Ep43-49)
   lalu render lokal.
+
+---
+
+## 15. PEMULIHAN AUDIO LOKAL, DEPENDENSI, & AUDIT REPO (7 Okt 2026)
+
+- File Drive yang diberikan pemilik teridentifikasi sebagai arsip `kliktahu.zip` (~157 MB); isi yang diharapkan
+  adalah 268 WAV (~192.2 MiB terurai; lihat `docs/audio-manifest.md`). Pratinjau Drive memberi peringatan
+  bahwa file terlalu besar untuk dipindai Google; itu **bukan** hasil pemindaian malware. Unduhan biner tidak
+  berhasil dari sandbox karena koneksi HTTPS ke host Drive terputus. Jangan mengklaim file sudah diunduh.
+- **Jangan masukkan ZIP atau WAV ke GitHub.** ZIP lebih besar daripada batas 100 MiB per file GitHub dan audio
+  mentah memang aset eksternal, bukan source code. Simpan di Drive/disk privat; jangan membuat bypass batas,
+  mengganti ekstensi, memecah ZIP untuk menghindari pemeriksaan, atau memaksa `git add -f`.
+- Pemilik dapat mengunduh arsip secara manual, lalu menjalankan `python tools/restore_audio.py <zip> --dry-run`
+  dan (jika lolos) tanpa `--dry-run`. Alat hanya mengekstrak nama yang tercantum di manifest ke direktori lokal
+  `audio_raw/`, memvalidasi kelengkapan, header WAV, CRC/SHA-256, batas ukuran, duplikasi, serta path traversal;
+  tidak mengeksekusi file dalam ZIP dan tidak menimpa file berbeda kecuali diberi `--overwrite`.
+- `.gitignore` mengabaikan `kliktahu*.zip`, `downloads/`, dan WAV di semua folder `audio_raw/`. Uji stdlib
+  `tests/test_restore_audio.py` dan `tools/check_repo_hygiene.py` menjaga media mentah/video serta file >50 MiB
+  agar tidak masuk perubahan repo. Workflow hanya menjalankan uji ringan dan memiliki `contents: read`.
+- Paket stabil yang dicek dan dipasang pada Python 3.11.2 sandbox: Pillow 12.3.0, NumPy 2.4.6,
+  imageio-ffmpeg 0.6.0. Python 3.12+ akan memilih NumPy 2.5.3 sesuai batas di `requirements.txt`.
+  Dependensi tetap tiga paket runtime; alat pemulihan/audit hanya memakai standard library.
+- Workflow memakai major stabil terbaru yang telah diverifikasi pada 7 Okt 2026: `actions/checkout@v7` dan
+  `actions/setup-python@v7`. Tetap tanpa render video, cron, token tambahan, atau workflow pihak ketiga.
+- Batasan jaminan: praktik ini mengurangi risiko ukuran, aktivitas, dan penyalahgunaan Actions; tidak ada cara
+  untuk menjamin akun tidak pernah ditandai. Jangan mengakali kontrol platform; jika ada enforcement, hubungi
+  GitHub Support melalui jalur resmi.

@@ -51,15 +51,18 @@ check_layout.py            audit tata letak/margin sebelum render
 qc_mp4.py                  QC hasil akhir MP4
 
 episodes/<slug>/           content.json · config.env · audio_raw/*.wav · METADATA.md
-pustaka/<EpNN_Nama>/       SIAP_TEMPEL.md (judul, deskripsi, hashtag, tag)
-long/mesin_long.py         mesin 16:9 (penyelarasan kata, komponen, kamera, bab, HUD)
-long/render_long.py        CLI render video panjang
-long/audio_long.py         master audio Long (VO + SFX)
-long/<slug>/               content.json · config.env · visual.py · thumbnail.py · METADATA.md
-analisis/                  mesin riset topik & metadata (v3-v6) + data hasil
-tools/render_lokal.sh      render penuh di komputer sendiri / sandbox
-docs/                      dokumen teknik, prompt proyek, manifest audio, atribusi
-docs/arsip/                salinan workflow Actions lama (tidak aktif)
+pustaka/<EpNN_Nama>/        SIAP_TEMPEL.md (judul, deskripsi, hashtag, tag)
+long/mesin_long.py          mesin 16:9 (penyelarasan kata, komponen, kamera, bab, HUD)
+long/render_long.py         CLI render video panjang
+long/audio_long.py          master audio Long (VO + SFX)
+long/<slug>/                content.json · config.env · visual.py · thumbnail.py · METADATA.md
+analisis/                   mesin riset topik & metadata (v3-v6) + data hasil
+tools/render_lokal.sh       render penuh di komputer sendiri / sandbox
+tools/restore_audio.py      pulihkan WAV dari ZIP lokal dengan validasi manifest
+tools/check_repo_hygiene.py audit ukuran + media agar tidak ikut masuk Git
+tests/                      uji ringan alat pemulihan (stdlib, tanpa dependensi baru)
+docs/                       dokumen teknik, prompt proyek, manifest audio, atribusi
+docs/arsip/                 salinan workflow Actions lama (tidak aktif)
 ```
 
 ## Cara render
@@ -89,6 +92,8 @@ python mesin_v11.py                  # selftest paket motion v11
 python diagrams.py                   # selftest semua visual adegan
 python sfx.py                        # katalog bunyi -> build/sfx_katalog.wav
 python analisis/mesin_v6.py --uji    # uji offline mesin analisis (v5/v6/pemeta/sapuan)
+python -m unittest discover -s tests -v
+python tools/check_repo_hygiene.py
 ```
 
 Semua uji di atas juga dijalankan otomatis oleh
@@ -97,12 +102,30 @@ ke `main` dan setiap Pull Request.
 
 ## Audio mentah tidak ada di repo
 
-268 berkas WAV (192 MiB) sengaja **tidak** disimpan di sini supaya repo tetap
-ringan dan akun aman. Daftar lengkap berkas + ukurannya ada di
-**[docs/audio-manifest.md](docs/audio-manifest.md)**. Salinan aslinya ada di
-arsip Google Drive `kliktahu.zip`; letakkan kembali di
-`episodes/<slug>/audio_raw/` sebelum render (skrip render akan mengingatkan
-kalau kosong).
+Arsip Drive `kliktahu.zip` berukuran sekitar **157 MB**; isinya 268 WAV dengan
+ukuran terurai **192.2 MiB**. Audio mentah dan arsip sengaja **tidak** masuk Git:
+selain menjaga repo tetap ringan, arsip ZIP tersebut melampaui batas 100 MiB per
+file GitHub (Git juga memperingatkan file di atas 50 MiB). Simpan arsip di Drive
+atau disk lokal privat, bukan di GitHub maupun Releases. File ZIP bernama
+`kliktahu*.zip`, folder `downloads/`, serta WAV di `audio_raw/` sudah diabaikan
+oleh `.gitignore`. Rujuk [batas file GitHub](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github)
+untuk detail ukuran file dan penyimpanan besar.
+
+Daftar lengkap nama dan ukuran ada di **[docs/audio-manifest.md](docs/audio-manifest.md)**.
+Setelah mengunduh arsip secara manual dari Drive ke komputer, validasi lalu
+pulihkan hanya WAV yang tercantum di manifest:
+
+```bash
+python tools/restore_audio.py /lokasi/aman/kliktahu.zip --dry-run
+python tools/restore_audio.py /lokasi/aman/kliktahu.zip
+```
+
+Alat ini memeriksa kelengkapan, CRC/integritas, header WAV, duplikasi, batas
+ukuran, dan path ZIP berbahaya; hanya menulis file ke `episodes/<slug>/audio_raw/`
+atau `long/<slug>/audio_raw/`. Ia tidak mengeksekusi isi ZIP dan menolak
+menimpa WAV yang berbeda tanpa `--overwrite`. WAV hasil pemulihan tetap lokal
+untuk render; jangan gunakan `git add -f`. Verifikasi dengan `git status --short`
+sebelum commit.
 
 ## Hasil yang sudah ada
 

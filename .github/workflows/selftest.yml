@@ -24,9 +24,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -37,6 +37,12 @@ jobs:
 
       - name: Cek sintaks semua modul Python
         run: python -m compileall -q .
+
+      - name: Uji pemulihan audio dan kebersihan repo
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -v
+          python tools/check_repo_hygiene.py
 
       - name: Selftest mesin gambar
         run: |
@@ -58,7 +64,8 @@ jobs:
           set -euo pipefail
           for f in AGEN.md PUSTAKA.md requirements.txt \
                    fonts/Poppins-Bold.ttf fonts/Poppins-Regular.ttf fonts/OFL.txt \
-                   tools/render_lokal.sh; do
+                   tools/render_lokal.sh tools/restore_audio.py \
+                   tools/check_repo_hygiene.py tests/test_restore_audio.py; do
             [ -f "$f" ] || { echo "HILANG: $f"; exit 1; }
           done
           bash -n tools/render_lokal.sh
