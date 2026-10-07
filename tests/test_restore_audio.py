@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from contextlib import redirect_stderr
+from io import StringIO
 import tempfile
 import unittest
 import zipfile
 from pathlib import Path
 
-from tools.restore_audio import RestoreError, load_manifest, restore_archive
+from tools.restore_audio import RestoreError, load_manifest, main, restore_archive
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -122,6 +124,11 @@ class RestoreAudioTests(unittest.TestCase):
             with self.assertRaisesRegex(RestoreError, "symlink"):
                 restore_archive(archive_path, root)
 
+    def test_legacy_restore_cli_is_blocked_without_explicit_opt_in(self) -> None:
+        with redirect_stderr(StringIO()):
+            self.assertEqual(main(["--dry-run"]), 3)
+
 
 if __name__ == "__main__":
+
     unittest.main()

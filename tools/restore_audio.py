@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Safely restore locally stored KlikTahu narration WAVs from the Drive ZIP.
+"""LEGACY WAV archive validator/restore utility — not used by current production.
 
-Only files listed in docs/audio-manifest.md are extracted. The archive itself
-and all restored WAVs are intended to stay outside GitHub.
+Per current owner direction, new production uses human-listenable MP3 narration.
+The manifest parser remains for historical audit/tests. CLI restoration requires
+an explicit --legacy-wav-restore opt-in and must not be used for new videos.
 """
 from __future__ import annotations
 
@@ -294,8 +295,8 @@ def main(argv: list[str] | None = None) -> int:
     root_default = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(
         description=(
-            "Pulihkan hanya WAV yang tercantum di docs/audio-manifest.md dari "
-            "ZIP lokal. Arsip dan audio tetap di luar Git."
+            "LEGACY saja: audit/pulihkan arsip WAV lama. Produksi baru memakai MP3; "
+            "restore WAV harus diaktifkan secara eksplisit."
         )
     )
     parser.add_argument(
@@ -307,7 +308,20 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--root", type=Path, default=root_default, help=argparse.SUPPRESS)
     parser.add_argument("--dry-run", action="store_true", help="validasi penuh tanpa menulis WAV")
     parser.add_argument("--overwrite", action="store_true", help="izinkan mengganti WAV lokal yang berbeda")
+    parser.add_argument(
+        "--legacy-wav-restore",
+        action="store_true",
+        help="opt-in manual untuk arsip lama saja; jangan dipakai untuk produksi baru",
+    )
     args = parser.parse_args(argv)
+
+    if not args.legacy_wav_restore:
+        print(
+            "[STOP] Restore WAV adalah workflow arsip lama. Produksi baru wajib memakai narasi MP3; "
+            "jika pemilik benar-benar meminta pemulihan arsip lama, gunakan opt-in eksplisit.",
+            file=sys.stderr,
+        )
+        return 3
 
     root = args.root.expanduser().resolve()
     archive_path = args.archive or (root / "kliktahu.zip")

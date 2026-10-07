@@ -1,5 +1,7 @@
 # PROMPT BANGUN ULANG - Mesin Produksi Channel KlikTahu
 
+> **PROMPT ARSIP / LEGACY (7 Okt 2026):** bagian ini masih memakai nomor episode dan sumber WAV. Instruksi aktif adalah `AGEN.md` §17: identitas/nama publik berbasis judul video, narasi MP3 yang dirancang untuk didengar, topik harus diriset ulang, Notion dibatalkan, dan tidak ada penghapusan massal tanpa lingkup/konfirmasi.
+
 ## Cara pakai (untuk pemilik channel)
 1. Buka chat baru (akun apa pun), lalu salin SELURUH teks di bawah garis "MULAI PROMPT" sampai "AKHIR PROMPT".
 2. Tempel sebagai pesan pertama. AI akan membangun mesinnya bertahap (Tahap 1 sampai 8) dan melapor tiap tahap.

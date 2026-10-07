@@ -28,13 +28,28 @@ venv/
 /timeline.json
 /list.txt
 
-# --- audio mentah & hasil olahan (lihat docs/audio-manifest.md) ------------
+# --- audio sumber/hasil olahan dan PCM scratch (lihat README.md) ------------
 audio/
 audio_proc/
 audio_tmp/
 episodes/*/audio_raw/*.wav
 long/*/audio_raw/*.wav
 **/audio_raw/*.wav
+
+# Audio dari suara sintetis/manusia dan render final harus tetap di Drive/lokal.
+*.mp3
+*.m4a
+*.aac
+*.flac
+*.ogg
+*.opus
+*.aif
+*.aiff
+*.wma
+*.amr
+*.3gp
+*.caf
+*.au
 
 # Arsip audio milik channel tetap di Drive/penyimpanan lokal, bukan GitHub.
 kliktahu*.zip

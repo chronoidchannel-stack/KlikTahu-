@@ -1,12 +1,12 @@
 # KlikTahu — Mesin Produksi Video (Shorts 1080×1920 & Long 16:9)
 
 Repo ini adalah **mesin produksi** channel YouTube **KlikTahu**: fakta sains &
-misteri bahasa Indonesia. Dari data episode (naskah VO + diagram) mesin
-menghasilkan video jadi: gambar animasi 60 fps, audio narasi yang dirapikan,
-efek suara sintetis, QC otomatis, sampai teks siap tempel untuk YouTube.
+misteri bahasa Indonesia. Setiap video memakai judul sebagai nama publik dan
+nama berkas. Mesin merangkai naskah, visual, audio narasi MP3 yang dirancang
+untuk didengar, efek suara, QC otomatis, dan paket siap unggah.
 
 > **AI/agen baru yang membuka chat?** Baca **[AGEN.md](AGEN.md)** dulu — di situ
-> ada memori jangka panjang proyek, status terakhir, resep episode baru, dan
+> ada memori jangka panjang proyek, status terakhir, resep video baru, dan
 > aturan yang tidak boleh dilanggar. Semua pekerjaan bisa dilanjutkan dari sana
 > tanpa perlu chat lama.
 
@@ -31,7 +31,7 @@ Rinciannya di [AGEN.md §14](AGEN.md) dan [docs/arsip/README.md](docs/arsip/READ
 
 ```
 AGEN.md                    memori jangka panjang proyek (wajib diperbarui)
-PUSTAKA.md                 indeks semua episode + judul & status rilis
+PUSTAKA.md                 indeks semua video berdasarkan judul & status rilis
 LICENSE                    hak cipta (all rights reserved)
 requirements.txt           pillow, numpy, imageio-ffmpeg — tidak ada lainnya
 fonts/                     Poppins Bold/SemiBold/Medium/Regular + OFL.txt
@@ -50,17 +50,19 @@ sfx.py                     katalog 24 bunyi sintetis (numpy)
 check_layout.py            audit tata letak/margin sebelum render
 qc_mp4.py                  QC hasil akhir MP4
 
-episodes/<slug>/           content.json · config.env · audio_raw/*.wav · METADATA.md
-pustaka/<EpNN_Nama>/        SIAP_TEMPEL.md (judul, deskripsi, hashtag, tag)
+episodes/<legacy-key>/     sumber Shorts lama; input produksi baru audio_raw/*.mp3
+pustaka/<legacy-key>/      metadata/teks lama; output publik baru tetap berbasis judul
 long/mesin_long.py          mesin 16:9 (penyelarasan kata, komponen, kamera, bab, HUD)
 long/render_long.py         CLI render video panjang
 long/audio_long.py          master audio Long (VO + SFX)
 long/<slug>/                content.json · config.env · visual.py · thumbnail.py · METADATA.md
 analisis/                   mesin riset topik & metadata (v3-v6) + data hasil
-tools/render_lokal.sh       render penuh di komputer sendiri / sandbox
-tools/restore_audio.py      pulihkan WAV dari ZIP lokal dengan validasi manifest
-tools/check_repo_hygiene.py audit ukuran + media agar tidak ikut masuk Git
-tests/                      uji ringan alat pemulihan (stdlib, tanpa dependensi baru)
+tools/render_lokal.sh       render lokal; nama MP4/MP3 diambil dari judul video
+tools/video_names.py        buat slug publik dari content.json:title
+tools/resolve_video.py      petakan slug judul ke sumber lama tanpa nomor di CLI
+tools/restore_audio.py      alat arsip WAV lama; tidak dipakai di produksi baru
+tools/check_repo_hygiene.py audit media/ukuran supaya tidak masuk Git
+tests/                      uji ringan alat dan sinkronisasi fakta
 docs/                       dokumen teknik, prompt proyek, manifest audio, atribusi
 docs/arsip/                 salinan workflow Actions lama (tidak aktif)
 ```
@@ -70,14 +72,16 @@ docs/arsip/                 salinan workflow Actions lama (tidak aktif)
 ```bash
 pip install -r requirements.txt
 
-# Shorts — cek cepat dulu (audio, timeline, tata letak), tanpa render frame
-tools/render_lokal.sh shorts ep49_bintang prep
+# CLI publik memakai slug dari judul; resolver masih menemukan folder sumber lama.
+# Narasi MP3 tiap adegan harus ada di folder sumber/audio_raw/<id-adegan>.mp3.
+# Cek cepat menghasilkan MP3 final/narasi + timeline, tanpa render frame.
+tools/render_lokal.sh shorts kenapa-bintang-berkedip-tapi-planet-tidak prep
 
-# Shorts — render penuh (hasil di dist/)
-tools/render_lokal.sh shorts ep49_bintang
+# Shorts — render penuh; dist/kenapa-bintang-berkedip-tapi-planet-tidak.mp4
+tools/render_lokal.sh shorts kenapa-bintang-berkedip-tapi-planet-tidak
 
-# Video panjang 16:9
-tools/render_lokal.sh long v02_laut_dalam
+# Video panjang 16:9; output dist/perjalanan-ke-dasar-laut-terdalam-di-bumi.mp4
+tools/render_lokal.sh long perjalanan-ke-dasar-laut-terdalam-di-bumi
 ```
 
 Setelan opsional: `CHUNKS=12` (potongan, menjaga pemakaian disk),
@@ -100,36 +104,34 @@ Semua uji di atas juga dijalankan otomatis oleh
 [`.github/workflows/selftest.yml`](.github/workflows/selftest.yml) setiap push
 ke `main` dan setiap Pull Request.
 
-## Audio mentah tidak ada di repo
+## Audio untuk didengar dan dipakai di video
 
-Arsip Drive `kliktahu.zip` berukuran sekitar **157 MB**; isinya 268 WAV dengan
-ukuran terurai **192.2 MiB**. Audio mentah dan arsip sengaja **tidak** masuk Git:
-selain menjaga repo tetap ringan, arsip ZIP tersebut melampaui batas 100 MiB per
-file GitHub (Git juga memperingatkan file di atas 50 MiB). Simpan arsip di Drive
-atau disk lokal privat, bukan di GitHub maupun Releases. File ZIP bernama
-`kliktahu*.zip`, folder `downloads/`, serta WAV di `audio_raw/` sudah diabaikan
-oleh `.gitignore`. Rujuk [batas file GitHub](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github)
-untuk detail ukuran file dan penyimpanan besar.
+Produksi baru memakai **narasi MP3 per adegan**, bukan arsip WAV lama. Buat/rekam
+narasi dengan pace alami, artikulasi jelas, jeda yang nyaman, dan pengucapan angka
+serta istilah yang diperiksa. Simpan lokal sementara di
+`<folder-sumber>/audio_raw/<id-adegan>.mp3`; semua klip harus cocok satu per satu
+dengan ID adegan di `content.json`.
 
-Daftar lengkap nama dan ukuran ada di **[docs/audio-manifest.md](docs/audio-manifest.md)**.
-Setelah mengunduh arsip secara manual dari Drive ke komputer, validasi lalu
-pulihkan hanya WAV yang tercantum di manifest:
+`tools/render_lokal.sh` memeriksa daftar klip MP3, lalu mengubahnya menjadi PCM
+sementara dalam folder kerja yang diabaikan Git agar alat alignment/DSP lama tetap
+bisa dipakai. Ini **bukan** audio hasil unduh atau deliverable. Berkas publik yang
+dihasilkan dari proses audio adalah:
 
-```bash
-python tools/restore_audio.py /lokasi/aman/kliktahu.zip --dry-run
-python tools/restore_audio.py /lokasi/aman/kliktahu.zip
-```
+- `<judul-video>_narasi.mp3` — track narasi bersih untuk didengar;
+- `<judul-video>_audio.mp3` — master narasi + efek suara yang siap dipakai;
+- `<judul-video>.mp4` — audio mux akhir dikodekan AAC, bukan WAV.
 
-Alat ini memeriksa kelengkapan, CRC/integritas, header WAV, duplikasi, batas
-ukuran, dan path ZIP berbahaya; hanya menulis file ke `episodes/<slug>/audio_raw/`
-atau `long/<slug>/audio_raw/`. Ia tidak mengeksekusi isi ZIP dan menolak
-menimpa WAV yang berbeda tanpa `--overwrite`. WAV hasil pemulihan tetap lokal
-untuk render; jangan gunakan `git add -f`. Verifikasi dengan `git status --short`
-sebelum commit.
+File MP3/PCM/MP4 hanya disimpan lokal atau di Google Drive, bukan GitHub maupun
+GitHub Releases. `.gitignore` dan `tools/check_repo_hygiene.py` mencegah media masuk
+repo. Jalankan audit sebelum commit. Audio arsip WAV lama dan alat `restore_audio.py`
+dipertahankan sebagai catatan kompatibilitas, tetapi **jangan dipakai untuk produksi baru**.
+
+Batas unggah GitHub dan alasan mengeluarkan media dari repo dijelaskan di
+[GitHub: About large files](https://docs.github.com/en/repositories/working-with-files/managing-large-files/about-large-files-on-github).
 
 ## Hasil yang sudah ada
 
-Daftar episode, judul, durasi, dan tautan videonya ada di
+Daftar video, durasi, status, dan judulnya ada di
 **[PUSTAKA.md](PUSTAKA.md)**.
 
 ## Lisensi & atribusi

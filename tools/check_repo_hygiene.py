@@ -7,7 +7,11 @@ import sys
 from pathlib import Path
 
 MAX_FILE_BYTES = 50 * 1024 * 1024  # headroom below GitHub's per-file hard limit
-MEDIA_SUFFIXES = {".wav", ".mp4", ".mov", ".mkv", ".webm"}
+MEDIA_SUFFIXES = {
+    ".wav", ".mp3", ".m4a", ".aac", ".flac", ".ogg", ".opus",
+    ".aif", ".aiff", ".wma", ".amr", ".3gp", ".caf", ".au",
+    ".mp4", ".mov", ".mkv", ".webm",
+}
 AUDIO_ARCHIVE_PREFIX = "kliktahu"
 
 
@@ -35,7 +39,7 @@ def audit(paths: list[Path]) -> list[str]:
         suffix = path.suffix.casefold()
 
         if suffix in MEDIA_SUFFIXES or "audio_raw" in {part.casefold() for part in path.parts}:
-            errors.append(f"media mentah/video tidak boleh dilacak: {path}")
+            errors.append(f"media audio/video tidak boleh dilacak: {path}")
         if lower_name.startswith(AUDIO_ARCHIVE_PREFIX) and suffix == ".zip":
             errors.append(f"arsip audio tidak boleh masuk Git: {path}")
 
