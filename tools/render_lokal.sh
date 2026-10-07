@@ -6,17 +6,18 @@
 #  AGEN.md §14). Actions hanya untuk uji ringan (selftest.yml).
 #
 #  Pakai:
-#      tools/render_lokal.sh shorts <slug>            # render penuh
-#      tools/render_lokal.sh shorts <slug> prep       # berhenti sebelum render
-#      tools/render_lokal.sh long   <slug>            # video panjang 16:9
+#      tools/render_lokal.sh shorts <judul-slug>      # render penuh
+#      tools/render_lokal.sh shorts <judul-slug> prep # berhenti sebelum render frame
+#      tools/render_lokal.sh long   <judul-slug>      # video panjang 16:9
 #
 #  Variabel opsional:
 #      CHUNKS=12        jumlah potongan (menjaga pemakaian disk frame PNG)
 #      JOBS=4           proses paralel per potongan (bawaan: jumlah CPU)
 #      KEEP_FRAMES=1    jangan hapus frame setelah tiap potongan di-encode
 #
-#  Hasil akhir ada di dist/ (mp4 + METADATA.md + content.json; Long juga
-#  thumbnail.jpg + SIAP_TEMPEL.md).
+#  Berkas publik di dist/ memakai slug dari judul video, bukan nomor episode:
+#  <judul>.mp4, <judul>_audio.mp3, <judul>_narasi.mp3, metadata, dan thumbnail.
+#  WAV hanya PCM kerja sementara di folder build/ yang diabaikan Git.
 # ============================================================================
 set -euo pipefail
 
@@ -39,39 +40,60 @@ cd "$(dirname "$0")/.."          # selalu di akar repo
 ROOT="$(pwd)"
 need python3
 
-if [ "$MODE" = shorts ]; then DIR="episodes/$SLUG"; else DIR="long/$SLUG"; fi
-[ -f "$DIR/config.env" ] || die "tidak ada $DIR/config.env (slug salah?)"
+DIR="$(python3 tools/resolve_video.py "$MODE" "$SLUG")" || die "video tidak ditemukan dari slug judul: $SLUG"
+[ -f "$DIR/config.env" ] || die "tidak ada $DIR/config.env"
+SOURCE_KEY="$(basename "$DIR")"
 
-# --- guard: audio mentah memang tidak disimpan di repo ----------------------
+# --- audio sumber: narasi MP3 yang bisa didengar, bukan arsip WAV lama ------
 shopt -s nullglob
-RAW=( "$DIR"/audio_raw/*.wav )
-if [ "${#RAW[@]}" -eq 0 ]; then
-  die "audio mentah kosong: $DIR/audio_raw/ belum diisi.
-       Audio sengaja tidak disimpan di repo — lihat docs/audio-manifest.md
-       (arsip: Google Drive 'kliktahu.zip' -> $DIR/audio_raw/)."
+AUDIO_CLIPS=( "$DIR"/audio_raw/*.mp3 )
+if [ "${#AUDIO_CLIPS[@]}" -eq 0 ]; then
+  die "narasi MP3 belum tersedia: isi $DIR/audio_raw/ dengan satu klip MP3 per adegan.
+       Arsip WAV lama adalah bahan historis dan tidak dipakai untuk produksi baru."
 fi
-printf '[info] %d klip audio mentah untuk %s\n' "${#RAW[@]}" "$DIR"
 
-# --- konfigurasi episode ----------------------------------------------------
+# --- konfigurasi produksi ---------------------------------------------------
 # shellcheck disable=SC1090
 set -a; source "$DIR/config.env"; set +a
 : "${FPS:?config.env belum mengisi FPS}"
-: "${OUT_NAME:?config.env belum mengisi OUT_NAME}"
 
 FF="$(python3 -c 'import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())')"
+VIDEO_TITLE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["title"])' "$DIR/content.json")"
+TITLE_SLUG="$(python3 tools/video_names.py "$DIR/content.json")"
+
+# Pastikan setiap adegan punya tepat satu sumber MP3 sebelum menulis apa pun.
+python3 - "$DIR/content.json" "$DIR/audio_raw" <<'PY'
+import json, pathlib, sys
+content = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+audio_dir = pathlib.Path(sys.argv[2])
+expected = {scene["id"] for scene in content.get("scenes", [])}
+actual = {path.stem for path in audio_dir.glob("*.mp3")}
+missing, extra = sorted(expected - actual), sorted(actual - expected)
+if missing or extra:
+    if missing:
+        print("[GAGAL] MP3 adegan hilang:", ", ".join(missing), file=sys.stderr)
+    if extra:
+        print("[GAGAL] MP3 tidak dikenal:", ", ".join(extra), file=sys.stderr)
+    raise SystemExit(1)
+PY
+printf '[info] %d klip narasi MP3 untuk “%s”\n' "${#AUDIO_CLIPS[@]}" "$VIDEO_TITLE"
 CHUNKS="${CHUNKS:-12}"
 JOBS="${JOBS:-$( (nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2) )}"
 DISK_FRAMES="frames"
 
 echo "=========================================================================="
-echo " KlikTahu · $MODE · $SLUG"
+echo " KlikTahu · $MODE · $VIDEO_TITLE"
 echo " FPS=$FPS  SS=${SS:-?}  potongan=$CHUNKS  proses/potongan=$JOBS  fase=$PHASE"
 echo "=========================================================================="
 
 # ============================================================ 1) audio + naskah
 mkdir -p audio audio_proc build dist
 cp "$DIR/content.json" .
-cp "$DIR"/audio_raw/*.wav audio/
+# Decode MP3 only into ignored PCM scratch files for the existing alignment/DSP tools.
+for source in "${AUDIO_CLIPS[@]}"; do
+  stem="$(basename "${source%.mp3}")"
+  "$FF" -y -loglevel error -i "$source" -vn -ar 48000 -ac 2 -c:a pcm_s16le "audio/${stem}.wav"
+done
 export KT_BUILD=build
 
 echo "--- process_audio.py (rapikan VO + QC keutuhan)"
@@ -88,14 +110,26 @@ if [ "$MODE" = shorts ]; then
   python3 check_layout.py
 else
   echo "--- align kata + audio Long + thumbnail"
-  python3 long/render_long.py --slug "$SLUG" --align
+  python3 long/render_long.py --slug "$SOURCE_KEY" --align
   mkdir -p build/mix
-  python3 long/audio_long.py --slug "$SLUG" --out build/mix/audio_master.wav
+  python3 long/audio_long.py --slug "$SOURCE_KEY" --out build/mix/audio_master.wav
   python3 "$DIR/thumbnail.py" --out build/thumbnail.jpg
   AUDIO_MASTER="build/mix/audio_master.wav"
   export KT_AUDIO_SRC="$AUDIO_MASTER"
 fi
 [ "$MODE" = shorts ] && AUDIO_MASTER="build/audio_master.wav" && export KT_AUDIO_SRC="$AUDIO_MASTER"
+
+# Audio yang diberikan kepada manusia adalah MP3 ter-master; WAV tetap hanya scratch PCM.
+AUDIO_MP3="dist/${TITLE_SLUG}_audio.mp3"
+NARRATION_MP3="dist/${TITLE_SLUG}_narasi.mp3"
+"$FF" -y -loglevel error -i "$AUDIO_MASTER" -vn -c:a libmp3lame -b:a "${MP3_BITRATE:-256k}" \
+  -ar 48000 -ac 2 -metadata title="$VIDEO_TITLE — audio final" -metadata artist="KlikTahu" \
+  -metadata album="KlikTahu · audio video" "$AUDIO_MP3"
+"$FF" -y -loglevel error -i build/audio_master_vo.wav -vn -c:a libmp3lame -b:a "${VOICE_BITRATE:-192k}" \
+  -ar 48000 -ac 2 -metadata title="$VIDEO_TITLE — narasi" -metadata artist="KlikTahu" \
+  -metadata album="KlikTahu · narasi video" "$NARRATION_MP3"
+echo "audio final MP3 -> $AUDIO_MP3"
+echo "narasi MP3 -> $NARRATION_MP3"
 
 if [ "$PHASE" = prep ]; then
   echo
@@ -133,7 +167,7 @@ for i in $(seq 0 $((CHUNKS - 1))); do
           -b:v "${VBITRATE:-6400k}" -maxrate "${MAXRATE:-11000k}" -bufsize "${BUFSIZE:-16000k}" \
           -pix_fmt yuv420p -profile:v high -level 4.2 "parts/part_$i.mp4"
   else
-    python3 long/render_long.py --slug "$SLUG" --timeline timeline.json --fps "$FPS" --ss "${SS:-1.25}" \
+    python3 long/render_long.py --slug "$SOURCE_KEY" --timeline timeline.json --fps "$FPS" --ss "${SS:-1.25}" \
             --jobs "$JOBS" --range "$LO:$HI" --vb "${VBITRATE:-9000k}" --maxrate "${MAXRATE:-14000k}" \
             --bufsize "${BUFSIZE:-20000k}" --preset "${PRESET:-slow}" --tune "${TUNE:-animation}" \
             --out "parts/part_$i.mp4"
@@ -147,24 +181,26 @@ rm -rf "$DISK_FRAMES"
 # ============================================================ 4) gabung + mux
 echo "--- gabung potongan (tanpa re-encode) + mux audio"
 "$FF" -y -loglevel error -f concat -safe 0 -i list.txt -c copy video_master.mp4
+VIDEO_MP4="dist/${TITLE_SLUG}.mp4"
 "$FF" -y -loglevel error -i video_master.mp4 -i "$AUDIO_MASTER" \
       -map 0:v:0 -map 1:a:0 -c:v copy -c:a aac -b:a "${ABITRATE:-256k}" -ar 48000 \
-      -movflags +faststart -shortest "dist/${OUT_NAME}.mp4"
-ls -la "dist/${OUT_NAME}.mp4"
+      -movflags +faststart -shortest "$VIDEO_MP4"
+ls -la "$VIDEO_MP4"
 
 # ============================================================ 5) QC + serah terima
 echo "--- QC akhir (qc_mp4.py)"
-python3 qc_mp4.py "dist/${OUT_NAME}.mp4"
+python3 qc_mp4.py "$VIDEO_MP4"
 
-cp "$DIR/METADATA.md" dist/ 2>/dev/null || echo "[warn] METADATA.md belum ada di $DIR"
-cp "$DIR/content.json" "dist/${OUT_NAME}_content.json"
-if [ "$MODE" = long ]; then
-  [ -f build/thumbnail.jpg ] && cp build/thumbnail.jpg dist/thumbnail.jpg
-  P="pustaka/${OUT_NAME#KlikTahu_}"
-  [ -f "$P/SIAP_TEMPEL.md" ] && cp "$P/SIAP_TEMPEL.md" dist/ || true
-else
-  P="pustaka/${OUT_NAME#KlikTahu_}"
-  [ -f "$P/SIAP_TEMPEL.md" ] && cp "$P/SIAP_TEMPEL.md" dist/ || true
+cp "$DIR/METADATA.md" "dist/${TITLE_SLUG}_metadata.md" 2>/dev/null || echo "[warn] METADATA.md belum ada di $DIR"
+cp "$DIR/content.json" "dist/${TITLE_SLUG}_content.json"
+if [ "$MODE" = long ] && [ -f build/thumbnail.jpg ]; then
+  cp build/thumbnail.jpg "dist/${TITLE_SLUG}_thumbnail.jpg"
+fi
+# OUT_NAME hanya dipakai sebagai alias arsip internal untuk menemukan teks lama.
+P=""
+if [ -n "${OUT_NAME:-}" ]; then P="pustaka/${OUT_NAME#KlikTahu_}"; fi
+if [ -n "$P" ] && [ -f "$P/SIAP_TEMPEL.md" ]; then
+  cp "$P/SIAP_TEMPEL.md" "dist/${TITLE_SLUG}_siap-tempel.md"
 fi
 
 echo

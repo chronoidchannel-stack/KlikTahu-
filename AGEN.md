@@ -6,26 +6,29 @@
 ---
 
 ## 1. Apa ini
-Repo **kliktahu-shorts** = mesin produksi channel YouTube **KlikTahu** (Shorts edukasi sains & misteri
-bahasa Indonesia, format 1080x1920 - 60 fps). Semua dikerjakan agen (AI) end-to-end: riset topik dari data
-pencarian real-time -> naskah -> diagram animasi -> voice over TTS -> render paralel di GitHub Actions ->
-rilis otomatis -> pustaka teks siap-tempel.
+Repo **chronoidchannel-stack/KlikTahu-** = mesin produksi channel YouTube **KlikTahu** (Shorts edukasi
+sains & misteri bahasa Indonesia, format 1080x1920 - 60 fps). Alur proyek: riset topik -> naskah -> diagram
+animasi -> voice over TTS -> render video lokal -> pustaka teks siap-tempel.
 
 - **Repo GitHub:** `chronoidchannel-stack/KlikTahu-`. Jangan sentuh repo lain milik pemilik.
-- **Branch kerja:** `main` (repo baru 6 Okt 2026; di repo/akun lama namanya `arena/01a0cc99-kliktahu-shorts`).
+- **Branch default repo:** `main`; gunakan branch kerja yang dialokasikan untuk sesi agen dan jangan
+  mengganti branch tanpa instruksi.
 - **GitHub hanya menyimpan kode + uji ringan.** Render video TIDAK di Actions — jalankan lokal lewat
-  `tools/render_lokal.sh`. Baca §14 (aturan keamanan akun) sebelum mengubah apa pun soal workflow.
+  `tools/render_lokal.sh`. Baca §14-§15 (aturan keamanan akun dan media) sebelum mengubah workflow.
 - **Hasil video diserahkan langsung** ke pemilik sebagai berkas MP4 (folder `dist/`), bukan lewat Release.
 
-## 2. Status terkini (perbarui baris ini setiap selesai episode)
+## 2. Status terkini (perbarui baris ini setiap selesai video)
 
-> **MULAI DARI SINI:** keadaan terbaru proyek ada di **§14 (6 Okt 2026 — pindah akun & repo, render tidak lagi
-> di GitHub Actions)**. Catatan rilis Ep24-Ep49 di bawah tetap berlaku sebagai riwayat isi episode.
+> **MULAI DARI SINI:** keputusan paling baru ada di **§17 (7 Okt 2026 — audio MP3, nama berbasis judul,
+> riset topik, dan penghapusan aman)**. Catatan §14–§16 adalah sejarah/guardrail; jika petunjuk lama soal WAV,
+> nomor episode publik, restore ZIP, atau Notion bertentangan dengan §17, ikuti §17. Catatan rilis lama tetap
+> dipertahankan sebagai arsip penting, bukan instruksi untuk menghapusnya.
 
 ### ATURAN KERAS (pelajaran 22 Sep, user marah)
-1. **1 episode = 1 render = 1 rilis.** SEMUA aset (naskah, VO, visual, METADATA.md, pustaka)
-   WAJIB lengkap di push PERTAMA yang memicu render. DILARANG commit "METADATA.md" belakangan
-   hanya demi memperbarui aset rilis - itu me-render ulang seluruh video (terlanjur 4x boros).
+1. **1 video = 1 render = 1 rilis.** Judul video adalah identitas publik kanonis; angka/slug episode hanya
+   kunci internal untuk menjaga kompatibilitas folder lama, bukan judul/nama berkas publik. SEMUA aset
+   (naskah, audio, visual, METADATA.md, pustaka) WAJIB lengkap sebelum render. DILARANG commit metadata
+   belakangan hanya untuk memperbarui aset rilis — itu dapat memicu kerja ulang yang tidak perlu.
 2. **METADATA.md setiap episode WAJIB memuat 4 blok sejak awal:** Judul (3 pilihan),
    Deskripsi (blok penuh siap salin), **Hashtag** (terpisah), **Tag**. Template ada di
    `pustaka/Ep37_Jerawat/SIAP_TEMPEL.md` + `episodes/ep37_jerawat/METADATA.md`.
@@ -550,7 +553,7 @@ Aturan sejak ini:
 `chronoidchannel-stack` dan repo baru **`chronoidchannel-stack/KlikTahu-`**. Seluruh mesin (kode, naskah,
 metadata, data analisis) dipindahkan ke repo ini; yang TIDAK ikut: audio mentah 192 MiB dan semua video.
 
-**Aturan baru yang WAJIB dipatuhi (ini yang menjaga akun tidak di-flag lagi):**
+**Mitigasi risiko yang WAJIB dipatuhi (tidak menjamin keputusan atau flag dari platform):**
 1. **Render video tidak di GitHub Actions.** Render lokal: `tools/render_lokal.sh <shorts|long> <slug>`.
    Runner gratis GitHub hanya untuk membangun/menguji perangkat lunak, bukan komputasi umum.
 2. **Jangan simpan MP4** di repo maupun di Releases. `.gitignore` sudah memblokir `*.mp4`, `dist/`,
@@ -582,3 +585,60 @@ metadata, data analisis) dipindahkan ke repo ini; yang TIDAK ikut: audio mentah 
   topik dari antrean analisis (piramida, lubang hitam Shorts, ular, aurora, es & salju, uban, cegukan, pelangi).
   Tunggu perintah pemilik; untuk episode baru buat `episodes/ep50_<slug>/` + `mesin_v11_ep50.py` (pola Ep43-49)
   lalu render lokal.
+
+---
+
+## 15. PEMULIHAN AUDIO LOKAL, DEPENDENSI, & AUDIT REPO (7 Okt 2026)
+
+- File Drive yang diberikan pemilik teridentifikasi sebagai arsip `kliktahu.zip` (~157 MB); isi yang diharapkan
+  adalah 268 WAV (~192.2 MiB terurai; lihat `docs/audio-manifest.md`). Pratinjau Drive memberi peringatan
+  bahwa file terlalu besar untuk dipindai Google; itu **bukan** hasil pemindaian malware. Unduhan biner tidak
+  berhasil dari sandbox karena koneksi HTTPS ke host Drive terputus. Jangan mengklaim file sudah diunduh.
+- **Jangan masukkan ZIP atau WAV ke GitHub.** ZIP lebih besar daripada batas 100 MiB per file GitHub dan audio
+  mentah memang aset eksternal, bukan source code. Simpan di Drive/disk privat; jangan membuat bypass batas,
+  mengganti ekstensi, memecah ZIP untuk menghindari pemeriksaan, atau memaksa `git add -f`.
+- Pemilik dapat mengunduh arsip secara manual, lalu menjalankan `python tools/restore_audio.py <zip> --dry-run`
+  dan (jika lolos) tanpa `--dry-run`. Alat hanya mengekstrak nama yang tercantum di manifest ke direktori lokal
+  `audio_raw/`, memvalidasi kelengkapan, header WAV, CRC/SHA-256, batas ukuran, duplikasi, serta path traversal;
+  tidak mengeksekusi file dalam ZIP dan tidak menimpa file berbeda kecuali diberi `--overwrite`.
+- `.gitignore` mengabaikan `kliktahu*.zip`, `downloads/`, dan WAV di semua folder `audio_raw/`. Uji stdlib
+  `tests/test_restore_audio.py` dan `tools/check_repo_hygiene.py` menjaga media mentah/video serta file >50 MiB
+  agar tidak masuk perubahan repo. Workflow hanya menjalankan uji ringan dan memiliki `contents: read`.
+- Paket stabil yang dicek dan dipasang pada Python 3.11.2 sandbox: Pillow 12.3.0, NumPy 2.4.6,
+  imageio-ffmpeg 0.6.0. Python 3.12+ akan memilih NumPy 2.5.3 sesuai batas di `requirements.txt`.
+  Dependensi tetap tiga paket runtime; alat pemulihan/audit hanya memakai standard library.
+- Workflow memakai major stabil terbaru yang telah diverifikasi pada 7 Okt 2026: `actions/checkout@v7` dan
+  `actions/setup-python@v7`. Tetap tanpa render video, cron, token tambahan, atau workflow pihak ketiga.
+- Batasan jaminan: praktik ini mengurangi risiko ukuran, aktivitas, dan penyalahgunaan Actions; tidak ada cara
+  untuk menjamin akun tidak pernah ditandai. Jangan mengakali kontrol platform; jika ada enforcement, hubungi
+  GitHub Support melalui jalur resmi.
+
+---
+
+## 16. PENYIMPANAN DRIVE & PEMBARUAN MATERI PRODUKSI (7 Okt 2026)
+
+- Folder produksi Drive: [KlikTahu_Produksi](https://drive.google.com/drive/folders/1j7aMh0FecG7TwpekChWrQodNiMbdxFUg) dengan subfolder Shorts, Long, Metadata (Shorts/Long), Thumbnails (Shorts/Long), Assets, dan Project_Docs.
+- Upload yang tersedia sekarang: arsip metadata Shorts Ep24–Ep49 (26 `METADATA.md` + 26 `SIAP_TEMPEL.md`), metadata Long01/Long02, thumbnail Long01/Long02 JPG 1280×720, serta `INDEKS_PRODUKSI.md`.
+- Draf cover Ep49 adalah still 9:16 dari pratinjau visual dengan timeline perkiraan tanpa audio; bukan frame video final. Jangan tandai sebagai thumbnail final sebelum dicocokkan dengan render tersinkron.
+- **Belum ada MP4 final yang tersedia di workspace atau ditemukan di Drive.** Arsip WAV di Drive masih belum berhasil diunduh; ZIP sekitar 165 MB melebihi transfer konektor 100 MB. Jangan mengklaim audio/video sudah dipulihkan atau dirender, dan jangan mengakali batas transfer.
+- Audit materi Long02 menggunakan sumber resmi terbaru yang ditemukan: Seabed 2030/GEBCO, 20 Apr 2026, melaporkan 28,7% dasar laut dipetakan dengan standar modern ([tautan](https://seabed2030.org/2026/04/20/global-seabed-mapping-reaches-new-milestone-as-five-million-square-kilometres-added-in-a-year/)). Narasi adegan `v02_naik`, visual (28,7% / 71,3%), metadata, dan beat SFX diperbarui 7 Okt 2026. WAV lama `v02_naik` sudah tidak sinkron; wajib rekam/generasikan ulang sebelum render. Durasi 10:12 adalah rujukan audio lama, bukan klaim durasi final.
+- Dependensi diperiksa ulang dan dipasang di `.venv`: Pillow 12.3.0; NumPy 2.4.6 untuk Python 3.11 (NumPy 2.5.3 tersedia untuk Python 3.12+); imageio-ffmpeg 0.6.0. Batas `requirements.txt` sudah memilih latest stabil yang kompatibel; tidak perlu menambah dependensi.
+- Uji stdlib kini 9 unittest (6 pemulihan + 3 sinkronisasi sumber/narasi/visual Long02); audit 227 file, selftest motion/diagram/SFX/analisis, `py_compile`, dan satu frame QA Long02 lolos. Frame memakai timeline estimasi untuk inspeksi statis, bukan render final.
+- Poster pratinjau Short Ep49 dan dua thumbnail Long dibuat dengan engine repo. Snapshot generasi berada lokal di `dist/` (diabaikan Git); hanya thumbnail final/draft yang dipilih, metadata, dan indeks yang diunggah ke Drive.
+- PR #2 tetap OPEN; perubahan Long02 ini perlu satu commit di branch sesi dan akan masuk ke PR tersebut. Linear KLI-5 tetap menunggu pilihan pemilik untuk topik Ep50/Long03. Jangan menyatakan episode baru telah dibuat.
+- Urutan lanjut (berdasarkan arahan lama, digantikan §17): jangan ikuti langkah restore WAV.
+
+---
+
+## 17. ARAHAN PEMILIK TERBARU: AUDIO MP3, JUDUL KANONIS, RISET, DAN PENGHAPUSAN AMAN (7 Okt 2026)
+
+- **Audio:** WAV arsip adalah kesalahan workflow sebelumnya untuk handoff produksi; jangan unduh/pulihkan atau gunakan ZIP `kliktahu.zip` sebagai sumber produksi. Buat narasi baru yang jelas dan enak didengar manusia: bahasa Indonesia alami, artikulasi, pace, jeda, volume, dan pengucapan angka diperiksa. Pakai MP3 sebagai aset dengar/sumber per adegan; user memilih suara setelah audition `add_voice`. Berkas yang diserahkan: `<judul-slug>_narasi.mp3` (VO) dan `<judul-slug>_audio.mp3` (VO+SFX master). Audio pada MP4 akhir adalah AAC. WAV/PCM hanya mungkin muncul sebagai scratch lokal yang diabaikan Git bila engine memerlukannya; bukan audio yang diunggah/diterima. Jangan klaim audio final sebelum dibuat dan QC.
+- **Judul kanonis:** jangan pakai “Ep50”, “Long03”, atau nomor rilis di judul publik/nama output. Nama publik diambil dari `content.json:title`, slug dari `tools/video_names.py`. Perubahan lokal pada `tools/render_lokal.sh` menghasilkan `<slug-judul>.mp4`, `<slug-judul>_audio.mp3`, `<slug-judul>_narasi.mp3`, metadata, dan thumbnail. Folder `episodes/`/`long/`, nomor episode, `OUT_NAME`, dan katalog rilis lama tetap dipertahankan sementara sebagai alias internal/historis; jangan rename/hapus massal sebelum ada daftar dan izin yang jelas.
+- **Penghapusan:** user berkata “episode lain atau semuanya hapus, tapi jangan yang penting”; lingkupnya ambigu. Belum ada file/dokumen/metadata Drive/GitHub yang dihapus. Sebelum tindakan destruktif, tanyakan apakah yang dimaksud arsip WAV, file draf, metadata video lama, folder sumber, atau label/nomor. Tawarkan memindahkan ke arsip/menandai legacy sebagai langkah reversible; pertahankan kode, naskah, sumber, riwayat rilis, dan materi yang sudah terbit kecuali user secara spesifik mengotorisasi penghapusan.
+- **Notion:** user membatalkan; jangan gunakan atau sinkronkan Notion.
+- **Riset topik terbaru:** laporan `analisis/riset-topik-ular-masuk-rumah-2026-10-07.md` merekomendasikan sudut “ular masuk rumah dan tindakan aman” untuk Short + Long, bukan klaim jumlah views. Sinyal Ciamis 7 Okt 2026 bersifat lokal; analisis menandai data YouTube/Google Trends yang tidak tersedia, keterbatasan benchmark lama, sumber Damkar/extension, judul, hook, keselamatan, dan metrik Studio untuk menguji hasil. Minta persetujuan topik sebelum membuat video baru. Jangan mengklaim dapat menjamin viral/views.
+- **Keamanan GitHub:** tak ada cara sah untuk menjamin akun tidak akan pernah ditandai. Patuhi aturan, bukan menyiasati deteksi: Actions hanya selftest ringan, jangan menaruh MP3/WAV/ZIP/MP4 di GitHub/Releases, audit ukuran/media, tanpa token/secret, tanpa bot/cron/render/permintaan API massal, jangan force-push, satu perubahan bermakna per push pada branch sesi saja.
+- **Lanjutan audio:** setelah suara dipilih, buat MP3 untuk satu video Short dan satu Long yang judulnya sudah ada, dengarkan/QC level dan artikulasi, simpan di Drive sebagai draft. Jangan menggunakan suara/isi lama yang tidak disetujui; pastikan izin penggunaan output layanan suara dan penyimpanan Drive sesuai kebijakan.
+- **Status verifikasi 7 Okt:** `bash -n tools/render_lokal.sh`, resolver untuk dua judul, audit repo (234 berkas), `git diff --check`, dan `python -m unittest discover -s tests -v` lolos (20 tes). `pytest` tidak terpasang; suite memakai `unittest` stdlib. Selftest CI offline dan ketersediaan encoder MP3 juga lolos; file hasil uji sementara dibersihkan. Local branch diselaraskan ke head PR #2 `4bb96ad`, dan diff baru ditinjau untuk branch sesi yang sama. Belum ada audio/video yang dihasilkan atau disertakan.
+- **Drive:** riset topik ular diunggah, `INDEKS_PRODUKSI.md` diperbarui, folder `Assets/Audio_MP3` dibuat, dan komentar koreksi workflow lama ditambahkan ke metadata Long02. Audio/video baru belum dibuat; tidak ada file yang dihapus.
+- Langkah berikut: minta pemilik menyetujui topik/judul, memilih suara melalui audition, dan menjelaskan cakupan penghapusan. Setelah disetujui baru buat narasi/master MP3 untuk Short + Long, dengarkan/QC dan simpan di Drive; jangan gunakan WAV arsip. Sebelum commit, ulangi `git status`/diff dan pastikan hanya kode/dokumen kecil yang masuk Git.

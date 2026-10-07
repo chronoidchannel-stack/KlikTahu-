@@ -1,6 +1,8 @@
 # KlikTahu - Long02 - Metadata + Analisis Kata Kunci
 **Judul video:** Perjalanan ke Dasar Laut Terdalam di Bumi
-**Tanggal produksi:** 24 September 2026 - **Durasi:** 10:12 (612.4 s) - 1920x1080 (16:9) - 30 fps - VO pria (TTS Arena voice-00), tanpa subtitle, SFX sintetis tanpa musik (mesin_long 16:9) - audio v5 (VO utuh)
+**Tanggal produksi:** 24 September 2026 - **Revisi materi:** 7 Oktober 2026 - **Durasi rujukan audio lama:** 10:12 (612.4 s; durasi final perlu dihitung ulang) - 1920x1080 (16:9) - 30 fps - VO pria (TTS Arena voice-00), tanpa subtitle, SFX sintetis tanpa musik (mesin_long 16:9) - audio v5 (adegan penutup lama)
+
+> **Catatan produksi:** narasi adegan penutup diperbarui mengikuti data Seabed 2030/GEBCO April 2026. WAV `v02_naik` dari arsip lama belum cocok dengan revisi ini; rekam/generasikan ulang adegan tersebut sebelum render final. Chapter/timestamp yang bersumber dari audio lama (termasuk awal bab 9:08) harus diselaraskan kembali.
 
 ---
 
@@ -73,11 +75,12 @@ Fakta penting:
 - tahun 1960 Jacques Piccard dan Don Walsh turun dengan Trieste: hampir 5 jam turun, sekitar 20 menit di dasar
 - tahun 2012 James Cameron turun sendirian dengan Deepsea Challenger
 - tahun 2018 ilmuwan melaporkan kantong plastik di kedalaman 10.898 meter di Palung Mariana
-- baru sekitar seperempat dasar laut dunia yang sudah dipetakan secara rinci (Seabed 2030, 2024)
+- per April 2026, 28,7% dasar laut dunia telah dipetakan dengan standar modern; lebih dari 71% belum tercakup dalam peta standar modern (Seabed 2030 / GEBCO)
 
 Sumber: NOAA Ocean Service & NOAA Ocean Exploration, Deep-Sea Research (2021), MBARI
 (Martini & Haddock, Scientific Reports 2017), JAMSTEC (Marine Policy 2018), Seabed 2030 / GEBCO,
 National Geographic, BBC Science Focus / Discover Wildlife, NPR (2023), CNBC Indonesia, IDN Times.
+Pembaruan cakupan peta dasar laut (20 Apr 2026): https://seabed2030.org/2026/04/20/global-seabed-mapping-reaches-new-milestone-as-five-million-square-kilometres-added-in-a-year/.
 Semua gambar di video adalah ilustrasi animasi.
 
 Tulis di komentar: ke mana kita harus pergi berikutnya?

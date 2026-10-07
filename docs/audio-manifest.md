@@ -1,13 +1,19 @@
-# Manifest audio mentah (TIDAK disimpan di repo)
+# Indeks inventaris audio WAV lama (arsip — bukan input produksi baru)
 
-Repo ini **tidak** memuat audio mentah. Alasannya: 268 berkas WAV = 192 MiB,
-membuat repo berat dan berisiko untuk akun GitHub (lihat `AGEN.md` §14).
+**Catatan penting per 7 Okt 2026:** produksi baru KlikTahu memakai narasi MP3
+per adegan yang dirancang untuk didengar manusia. Arsip `kliktahu.zip` (268 WAV,
+sekitar 192,2 MiB setelah diekstrak) adalah bahan historis; **jangan unduh atau
+pulihkan arsip ini untuk produksi baru**. Suara baru dibuat/diambil dalam format
+MP3 per adegan, hasil dengar/master MP3 disimpan di Drive, dan audio video final
+menggunakan AAC. PCM/WAV yang mungkin dipakai engine hanyalah scratch lokal yang
+diabaikan Git, bukan berkas publik.
 
-Audio aslinya ada di arsip Google Drive `kliktahu.zip` (folder `audio_raw/` per episode).
-Letakkan kembali berkasnya di `episodes/<slug>/audio_raw/` (atau `long/<slug>/audio_raw/`)
-sebelum menjalankan `tools/render_lokal.sh`.
+Tabel di bawah dipertahankan sebagai inventaris historis untuk audit dan
+kompatibilitas. ZIP/WAV/MP3/MP4 tidak boleh masuk GitHub atau Releases. Alat
+`tools/restore_audio.py` masih dipertahankan sementara sebagai utilitas legacy,
+tetapi bukan bagian dari workflow produksi saat ini.
 
-Total: **268 berkas**, **192.2 MiB**
+Total arsip historis: **268 berkas**, **192.2 MiB**
 
 
 ## ep24_bulan_merah/audio_raw — 8 berkas, 4.4 MiB

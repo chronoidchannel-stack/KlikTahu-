@@ -1,5 +1,7 @@
-# Pustaka KlikTahu - video & metadata per episode
+# Pustaka KlikTahu - katalog video berdasarkan judul
 
+> **Aturan nama publik 7 Okt 2026:** judul video adalah nama utama; heading dan berkas ekspor tidak memakai nomor episode. Folder/kode EpNN atau LongNN di bawah hanya kunci arsip internal untuk menjaga sumber lama tetap utuh.
+>
 > **Catatan 6 Okt 2026 (pindah akun & repo):** video **tidak lagi disimpan di repo ini maupun di
 > Releases** — aturan keamanan akun, lihat `AGEN.md` §14. Hasil render diserahkan langsung ke pemilik
 > sebagai berkas MP4 (`dist/`). Nama rilis di daftar di bawah (mis. `KlikTahu_Ep49_Bintang-76`) adalah
@@ -8,14 +10,14 @@
 | apa | di mana |
 |---|---|
 | **Video** (mp4 siap upload) | diserahkan sebagai berkas — JANGAN di-commit ke repo |
-| **Metadata & teks siap tempel** | folder `pustaka/<episode>/` di repo ini |
+| **Metadata & teks siap tempel** | folder arsip `pustaka/<legacy-key>/` di repo ini |
 | **Peta kata kunci real-time** | `analisis/PETA_KATA_KUNCI.md` |
 
 ---
 
 ## VIDEO PANJANG 16:9
 
-### Long02 - Perjalanan ke Dasar Laut Terdalam di Bumi
+### Perjalanan ke Dasar Laut Terdalam di Bumi
 - Video: rilis `KlikTahu_Long02_LautDalam-<run>` (Latest) - aset `KlikTahu_Long02_LautDalam.mp4` - 1920x1080 - 30 fps (10:12)
 - Thumbnail: aset `thumbnail.jpg` di rilis yang sama (1280x720)
 - Teks siap tempel (judul, deskripsi + 10 bab, hashtag, tag): `pustaka/Long02_LautDalam/SIAP_TEMPEL.md`
@@ -24,7 +26,7 @@
   Satu penyelaman tanpa putus: warna air, sinar matahari, salju laut & HUD kedalaman/tekanan/suhu/cahaya
   mengikuti kedalaman yang diucapkan narasi.
 
-### Long01 - Apa yang Terjadi Kalau Kamu Masuk ke Lubang Hitam?
+### Apa yang Terjadi Kalau Kamu Masuk ke Lubang Hitam?
 - Video: rilis `KlikTahu_Long01_LubangHitam-1` (Latest) - aset `KlikTahu_Long01_LubangHitam.mp4` - 1920x1080 - 30 fps (9:17)
 - Thumbnail: aset `thumbnail.jpg` di rilis yang sama (1280x720)
 - Teks siap tempel (judul, deskripsi + 10 bab, hashtag, tag): `pustaka/Long01_LubangHitam/SIAP_TEMPEL.md`
@@ -34,7 +36,7 @@
 
 ---
 
-## Ep49 - Kenapa Bintang Berkedip, Tapi Planet Tidak?
+## Kenapa Bintang Berkedip, Tapi Planet Tidak?
 - Video: rilis `KlikTahu_Ep49_Bintang-76` (Latest, run 36022773282) - aset `KlikTahu_Ep49_Bintang.mp4` - 1080x1920 - 60 fps (158.8 s)
 - Teks siap tempel (judul, deskripsi, tag, komentar): `pustaka/Ep49_Bintang/SIAP_TEMPEL.md`
 - Metadata lengkap: `episodes/ep49_bintang/METADATA.md`
@@ -43,7 +45,7 @@
   bintang berkedip + paku difraksi, kantong udara membelokkan cahaya, titik vs piringan + grafik rata-rata,
   lintasan cakrawala, Sirius warna-warni + prisma, laser 90 km + cermin lentur. SFX baru `laser`, `angin`.
 
-## Ep48 - Kenapa Jantung Tiba-tiba Berdebar Kencang?
+## Kenapa Jantung Tiba-tiba Berdebar Kencang?
 - Video: rilis `KlikTahu_Ep48_Jantung-75` (Latest) - aset `KlikTahu_Ep48_Jantung.mp4` - 1080x1920 - 60 fps (153.6 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep48_Jantung/SIAP_TEMPEL.md`
 - Metadata lengkap: `episodes/ep48_jantung/METADATA.md`
@@ -51,7 +53,7 @@
   EKG bergulir sinkron denyut, otak beralarm + adrenal + aliran adrenalin, kamar siang->malam, penampang dada,
   monitor detak ekstra + jeda, lingkaran napas 4-6 detik, daftar tanda bahaya.
 
-## Ep47 - Kenapa Petir Sering Menyambar Pohon?
+## Kenapa Petir Sering Menyambar Pohon?
 - Video: rilis `KlikTahu_Ep47_Petir-74` - aset `KlikTahu_Ep47_Petir.mp4` - 1080x1920 - 60 fps (139.2 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep47_Petir/SIAP_TEMPEL.md`
 - Metadata lengkap: `episodes/ep47_petir/METADATA.md`
@@ -59,35 +61,35 @@
   30.000 C vs matahari, pemandu bertahap, percikan penyambut, penampang batang (getah mendidih), loncatan samping,
   Empire State. Audio v5 (VO utuh, tanpa peredam napas).
 
-## Ep46 - Megalodon Masih Hidup? Giginya yang Menjawab
+## Megalodon Masih Hidup? Giginya yang Menjawab
 - Video: rilis `KlikTahu_Ep46_Megalodon-73` - aset `KlikTahu_Ep46_Megalodon.mp4` - 1080x1920 - 60 fps (144.0 s, audio v5 VO utuh; -71 jangan dipakai)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep46_Megalodon/SIAP_TEMPEL.md`
 - Metadata lengkap: `episodes/ep46_megalodon/METADATA.md`
 - Topik #1 PAPAN STRATEGI v6 (megalodon 44,9; pesaing hanya bertanya, Ep46 menjawab). Mesin v11 + SFX: gigi
   bergerigi vs telapak tangan & pisau roti, skala 16/24 m, sabuk gigi berganti, lapisan batuan 3,6 juta th, 73%.
 
-## Ep45 - Kenapa Luar Angkasa Gelap Padahal Ada Matahari?
+## Kenapa Luar Angkasa Gelap Padahal Ada Matahari?
 - Video: rilis `KlikTahu_Ep45_Langit-72` - aset `KlikTahu_Ep45_Langit.mp4` - 1080x1920 - 60 fps (147.2 s, audio v5 VO utuh; -70 jangan dipakai)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep45_Langit/SIAP_TEMPEL.md`
 - Metadata lengkap: `episodes/ep45_langit/METADATA.md`
 - Topik #1 PAPAN STRATEGI v6 (matahari 47,8; sudut PADAHAL). Mesin v11 + SFX: senter di kamar bersih vs berdebu,
   langit biru dari molekul udara, balon naik sampai langit hitam, matahari putih, paradoks Olbers, 13,8 M tahun.
 
-## Ep44 - Gunung Padang Piramida Tertua di Dunia? Ini Kata Buktinya
+## Gunung Padang Piramida Tertua di Dunia? Ini Kata Buktinya
 - Video: rilis `KlikTahu_Ep44_Padang-69` (Latest) - aset `KlikTahu_Ep44_Padang.mp4` - 1080x1920 - 60 fps (156.1 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep44_Padang/SIAP_TEMPEL.md`
 - Metadata lengkap: `episodes/ep44_padang/METADATA.md`
 - Topik #1 PAPAN STRATEGI v6 (situs misteri indonesia 46,9; pilar MISTERI). Mesin v11 + SFX: bukit 5 teras +
   370 tangga, lava retak jadi prisma, dinding disusun, batu kecapi berbunyi, stempel DICABUT 2024, lapisan umur.
 
-## Ep43 - Kuping Tiba-Tiba Berdenging? Itu Suara dari Dalam Telingamu
+## Kuping Tiba-Tiba Berdenging? Itu Suara dari Dalam Telingamu
 - Video: rilis `KlikTahu_Ep43_Kuping-68` (Latest) - aset `KlikTahu_Ep43_Kuping.mp4` - 1080x1920 - 60 fps (153,4 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep43_Kuping/SIAP_TEMPEL.md`
 - Metadata lengkap: `episodes/ep43_kuping/METADATA.md`
 - Topik #1 PAPAN STRATEGI v6 (kuping 45,1; sudut PRIBADI). Mesin v11 + SFX: telinga NGIIING, zoom ke
   koklea + sel rambut, eksperimen ruang hening 1953 (94%), equalizer otak, grafik batas aman WHO, slider 60%.
 
-## Ep42 - Sinyal Penuh Tapi Internet Lemot? Ini Sebabnya
+## Sinyal Penuh Tapi Internet Lemot? Ini Sebabnya
 - Video: rilis `KlikTahu_Ep42_Sinyal-67` - aset `KlikTahu_Ep42_Sinyal.mp4` - 1080x1920 - 60 fps (158,0 s)
 - Catatan: "Ep42 Listrik & Magnet" (rilis -66) dibuat sesi paralel di branch lama; nomor berikutnya Ep43
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep42_Sinyal/SIAP_TEMPEL.md`
@@ -96,7 +98,7 @@
   "EDITOR": judul kinetik + stabilo, stiker pop, penanda FAKTA n/7, transisi punch/slide/glitch, dorongan
   kamera di beat, + SFX sintetis (88 event, tanpa musik). VO voice-00 10/10 BERSIH.
 
-## Ep41 - Itu Bukan Hantu, Itu Otakmu
+## Itu Bukan Hantu, Itu Otakmu
 - Video: rilis terbaru - aset `KlikTahu_Ep41_Hantu.mp4` - 1080x1920 - 60 fps (143,0 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep41_Hantu/SIAP_TEMPEL.md`
 - Metadata lengkap: `episodes/ep41_hantu/METADATA.md`
@@ -105,7 +107,7 @@
   Vic Tandy), kamera sugesti, checklist hijau, banner "HANTU ITU ADA, DONG?" + stamp "BELUM BUKTI";
   VO voice-00 take-2 10/10 BERSIH (133,8 s @1,67-1,79 kata/s); timeline 143,0 s; ink worst 974
 
-## Ep40 - Gerhana Bukan Pertanda Kiamat
+## Gerhana Bukan Pertanda Kiamat
 - Video: rilis terbaru - aset `KlikTahu_Ep40_Gerhana.mp4` - 1080x1920 - 60 fps (158,5 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep40_Gerhana/SIAP_TEMPEL.md`
 - Metadata lengkap: `episodes/ep40_gerhana/METADATA.md`
@@ -115,7 +117,7 @@
   aman vs bahaya (retina), orbit miring 5 derajat, mitos + jadwal 2031/2042; VO voice-00 take-1
   10/10 BERSIH (149,3 s @1,76-1,83 kata/s); durasi bebas (MAXDUR 178, TARGET_WPS 1,90)
 
-## Ep39 - Bintang Jatuh Itu Bukan Bintang (Meteor & Komet)
+## Bintang Jatuh Itu Bukan Bintang (Meteor & Komet)
 - Video: rilis terbaru - aset `KlikTahu_Ep39_Meteor_Komet.mp4` - 1080x1920 - 60 fps (135,8 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep39_Meteor_Komet/SIAP_TEMPEL.md`
 - Metadata lengkap: `episodes/ep39_meteor_komet/METADATA.md`
@@ -126,7 +128,7 @@
   Orionids-Halley, komet vs asteroid vs meteor, mitos ramalan, panduan nonton;
   VO voice-00 take-2 10/10 bersih (126,6 s), tata letak bersih, ink worst 263
 
-## Ep38 - Kenapa Baterai Cepat Habis Padahal Nggak Dipakai?
+## Kenapa Baterai Cepat Habis Padahal Nggak Dipakai?
 - Video: rilis terbaru - aset `KlikTahu_Ep38_Baterai.mp4` - 1080x1920 - 60 fps (139,8 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep38_Baterai/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep38_Baterai/METADATA.md`
@@ -134,21 +136,21 @@
   baterai, uap panas, charger, persen lompat) + `_sel38` (sel Li-ion ion bolak-balik); mitos
   cas semalaman + slider zona 20-80%; VO voice-03 take-1 10/10 bersih (123,2 s mentah)
 
-## Ep37 - Kenapa Jerawat Muncul?
+## Kenapa Jerawat Muncul?
 - Video: rilis terbaru - aset `KlikTahu_Ep37_Jerawat.mp4` - 1080x1920 - 60 fps (119,4 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep37_Jerawat/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep37_Jerawat/METADATA.md`
 - Topik #2 antrean SEGAR (keluarga kulit ~296); MESIN v9 (folikel 4-keadaan, tekstur pori,
   kaca pembesar); VO take-1 10/10 bersih; episode terpendek sejak Ep30
 
-## Ep36 - Kenapa Migrain?
+## Kenapa Migrain?
 - Video: rilis terbaru - aset `KlikTahu_Ep36_Migrain.mp4` - 1080x1920 - 60 fps (133,7 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep36_Migrain/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep36_Migrain/METADATA.md`
 - Topik #1 antrean SEGAR (pusing & migrain 325,6); MESIN v9 penuh (CSD wave, CGRP loop,
   flip obat) - episode pertama yang naskahnya direkam ulang karena TTS lambat (149,6 -> 125,3 s)
 
-## Ep35 - Supermoon 2026 & Ilusi Bulan Raksasa
+## Supermoon 2026 & Ilusi Bulan Raksasa
 - Video: rilis terbaru - aset `KlikTahu_Ep35_Supermoon.mp4` - 1080x1920 - 60 fps (139,6 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep35_Supermoon/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep35_Supermoon/METADATA.md`
@@ -157,7 +159,7 @@
 - **Episode pertama MESIN v9 (kartu kaca/orbit/graf/kinesis/gelombang/flow/flip + trans whip)
   dan TANPA KARAKTER** (semua karakter dihapus dari mesin, diganti papan kaca v9)
 
-## Ep34 - Kenapa Mimisan?
+## Kenapa Mimisan?
 - Video: rilis terbaru - aset `KlikTahu_Ep34_Mimisan.mp4` - 1080x1920 - 60 fps (138,6 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep34_Mimisan/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep34_Mimisan/METADATA.md`
@@ -166,7 +168,7 @@
 
 ---
 
-## Ep33 - Kenapa Hujan Bisa Turun?
+## Kenapa Hujan Bisa Turun?
 - Video: rilis terbaru - aset `KlikTahu_Ep33_HujanAwan.mp4` - 1080x1920 - 60 fps (139,8 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep33_HujanBisaTurun/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep33_HujanBisaTurun/METADATA.md`
@@ -174,7 +176,7 @@
 
 ---
 
-## Ep32 - Kenapa Demam Naik Malam?
+## Kenapa Demam Naik Malam?
 - Video: rilis terbaru - aset `KlikTahu_Ep32_DemamImun.mp4` - 1080x1920 - 60 fps (123,3 s)
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep32_DemamNaikMalam/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep32_DemamNaikMalam/METADATA.md`
@@ -182,28 +184,28 @@
 
 ---
 
-## Ep31 - Kenapa Mata Kedutan?
+## Kenapa Mata Kedutan?
 - Video: rilis terbaru - aset `KlikTahu_Ep31_MataKedutan.mp4` - 1080x1920 - 60 fps
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep31_MataKedutan/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep31_MataKedutan/METADATA.md`
 
 ---
 
-## Ep30 - Kenapa Mulut Bau Padahal Rajin Sikat Gigi?
+## Kenapa Mulut Bau Padahal Rajin Sikat Gigi?
 - Video: rilis terbaru - aset `KlikTahu_Ep30_BauMulut.mp4` - 1080x1920 - 60 fps
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep30_BauMulut/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep30_BauMulut/METADATA.md`
 
 ---
 
-## Ep29 - Kenapa Kaki Sering Kesemutan dan Kram?
+## Kenapa Kaki Sering Kesemutan dan Kram?
 - Video: rilis terbaru - aset `KlikTahu_Ep29_KramKesemutan.mp4` - 1080x1920 - 60 fps
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep29_KramKesemutan/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep29_KramKesemutan/METADATA.md`
 
 ---
 
-## Ep28 - Kenapa Perut Bunyi?
+## Kenapa Perut Bunyi?
 - Video: rilis terbaru - aset `KlikTahu_Ep28_KenapaPerutBunyi.mp4` - 1080x1920 - 60 fps
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep28_KenapaPerutBunyi/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep28_KenapaPerutBunyi/METADATA.md`
@@ -212,7 +214,7 @@
 
 ---
 
-## Ep27 - Kenapa Orang Ngorok?
+## Kenapa Orang Ngorok?
 - Video: rilis terbaru - aset `KlikTahu_Ep27_KenapaOrangNgorok.mp4` - 1080x1920 - 60 fps
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep27_KenapaOrangNgorok/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep27_KenapaOrangNgorok/METADATA.md`
@@ -220,7 +222,7 @@
 
 ---
 
-## Ep26 - Kenapa Dinosaurus Punah?
+## Kenapa Dinosaurus Punah?
 - Video: rilis terbaru - aset `KlikTahu_Ep26_KenapaDinosaurusPunah.mp4` - 1080x1920 - 60 fps
 - Teks siap tempel (judul, deskripsi, tag): `pustaka/Ep26_KenapaDinosaurusPunah/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep26_KenapaDinosaurusPunah/METADATA.md`
@@ -228,14 +230,14 @@
 
 ---
 
-## Ep25 - Kenapa Mimpi Cepat Lupa Saat Bangun?
+## Kenapa Mimpi Cepat Lupa Saat Bangun?
 - Video: rilis terbaru - aset `KlikTahu_Ep25_KenapaMimpiCepatLupa.mp4` - 1080x1920 - 60 fps
 - Teks siap tempel: `pustaka/Ep25_KenapaMimpiCepatLupa/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep25_KenapaMimpiCepatLupa/METADATA.md`
 
 ---
 
-## Ep24 - Kenapa Bulan Berwarna Merah?
+## Kenapa Bulan Berwarna Merah?
 - Video: rilis terbaru - aset `KlikTahu_Ep24_KenapaBulanBerwarnaMerah.mp4` - 1080x1920 - 60 fps
 - Teks siap tempel: `pustaka/Ep24_KenapaBulanBerwarnaMerah/SIAP_TEMPEL.md`
 - Metadata lengkap: `pustaka/Ep24_KenapaBulanBerwarnaMerah/METADATA.md`
