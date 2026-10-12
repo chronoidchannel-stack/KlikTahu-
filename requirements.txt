@@ -2,11 +2,12 @@
 # Hanya tiga paket ini (tidak ada dependensi lain). Dipasang oleh CI selftest
 # dan oleh tools/render_lokal.sh.
 #
-# Versi terbaru saat diperbarui (6 Okt 2026) dan sudah diuji lulus:
-#   pillow 12.3.0 · numpy 2.4.6/2.5.3 · imageio-ffmpeg 0.6.0
-#
-# Catatan versi Python: numpy 2.5.x hanya menyediakan wheel untuk Python 3.12+.
-# Di Python 3.11 pakai numpy 2.4.x (batas >=2.4 di bawah sudah mencakup keduanya).
+# Rilis stabil mutakhir yang diverifikasi pada 7 Okt 2026:
+#   Pillow 12.3.0 · NumPy 2.5.3 (Python 3.12+) / 2.4.6 (Python 3.11)
+#   imageio-ffmpeg 0.6.0
+# Batas versi di bawah membiarkan pip memilih rilis stabil terbaru yang cocok
+# dengan versi Python, tanpa naik ke major version yang belum diuji proyek.
+# NumPy 2.5.x mensyaratkan Python >=3.12; pada Python 3.11 pip memilih 2.4.x.
 pillow>=12.3,<13
 numpy>=2.4,<3
 imageio-ffmpeg>=0.6,<1
