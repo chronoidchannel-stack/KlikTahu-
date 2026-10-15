@@ -249,8 +249,29 @@ def loop_blend(meta):
 _CAK = {}
 
 
-def cakram_langit(img, cx, cy, r, tg, gelap=1.0, alpha=1.0, bintang=1.0, seed=5):
-    """Cakram langit malam: isi navy (gelap 0..1 = seberapa gelap), bintang ter-cache + kedip."""
+def _bima_sakti(n, seed):
+    """Pita Bima Sakti: derau lembut (numpy) dipotong pita diagonal Gaussian, lalu blur. Di-cache per ukuran."""
+    import numpy as np
+    rnd = np.random.default_rng(seed)
+    kecil = 28
+    nz = rnd.random((kecil, kecil)).astype("float32")
+    im = Image.fromarray((nz * 255).astype("uint8"), "L").resize((n, n), Image.BICUBIC)
+    a = np.asarray(im).astype("float32") / 255.0
+    yy, xx = np.mgrid[0:n, 0:n].astype("float32")
+    # pita diagonal (kiri-bawah -> kanan-atas), lebar ~0,26 n, sedikit melengkung
+    d = ((xx - n / 2) * 0.62 + (yy - n / 2) * 0.78) / n + 0.06 * np.sin(xx / n * 4.0)
+    pita = np.exp(-(d / 0.13) ** 2)
+    # dua 'awan' lebih terang + celah gelap (great rift) agar tidak seperti garis
+    pita *= 0.75 + 0.45 * np.exp(-(((xx - n * 0.62) / (n * 0.22)) ** 2 + ((yy - n * 0.40) / (n * 0.22)) ** 2))
+    pita *= 1.0 - 0.45 * np.exp(-(d / 0.035) ** 2)
+    alpha = np.clip(pita * (0.35 + 0.65 * a), 0, 1)
+    lay = Image.fromarray((alpha * 255).astype("uint8"), "L").filter(ImageFilter.GaussianBlur(n * 0.012))
+    return lay
+
+
+def cakram_langit(img, cx, cy, r, tg, gelap=1.0, alpha=1.0, bintang=1.0, seed=5, paralaks=1.0):
+    """Cakram langit malam dengan KEDALAMAN: isi navy (gelap 0..1), pita Bima Sakti samar, bintang 3 lapis
+    (jauh/tengah/dekat) dengan paralaks berbeda + kedip, dan beberapa bintang terang berwarna dengan glint."""
     if alpha <= 0.01 or r <= 2:
         return
     col = mix(mix(NAVY2, NAVY, clamp(gelap)), CREAM, 0.0)
@@ -261,33 +282,82 @@ def cakram_langit(img, cx, cy, r, tg, gelap=1.0, alpha=1.0, bintang=1.0, seed=5)
         lay = Image.new("RGBA", (n, n), (0, 0, 0, 0))
         dd = ImageDraw.Draw(lay)
         dd.ellipse([2, 2, n - 2, n - 2], fill=(255, 255, 255, 255))
-        # bintang statis (deterministik)
         import random
         rnd = random.Random(seed)
         pts = []
-        for _ in range(int(r * 0.42)):
+        for _ in range(int(r * 0.46)):
             a = rnd.random() * 2 * math.pi
-            rr = r * math.sqrt(rnd.random()) * 0.97
-            pts.append((cx + rr * math.cos(a), cy + rr * math.sin(a), 1.0 + 1.6 * rnd.random() ** 3, rnd.random()))
-        lay = (lay, pts)
+            rr = r * math.sqrt(rnd.random()) * 0.96
+            ukuran = 1.0 + 1.6 * rnd.random() ** 3
+            lapis = 0 if ukuran < 1.25 else (1 if ukuran < 1.9 else 2)       # jauh / tengah / dekat
+            pts.append((cx + rr * math.cos(a), cy + rr * math.sin(a), ukuran, rnd.random(), lapis))
+        # bintang terang berwarna (Betelgeuse-oranye, Rigel-biru, putih): 5 buah, tidak di tepi
+        terang = []
+        for k in range(5):
+            a = rnd.random() * 2 * math.pi
+            rr = r * (0.25 + 0.55 * rnd.random())
+            warna = ((255, 205, 160), (190, 210, 255), (255, 250, 235), (200, 215, 255), (255, 225, 190))[k]
+            terang.append((cx + rr * math.cos(a), cy + rr * math.sin(a), 2.4 + 0.8 * rnd.random(), rnd.random(), warna))
+        galaksi = _bima_sakti(n, seed)
+        # pita hanya di dalam cakram
+        galaksi = Image.fromarray((__import__("numpy").asarray(galaksi).astype("float32")
+                                   * __import__("numpy").asarray(lay.getchannel("A")).astype("float32") / 255.0
+                                   ).astype("uint8"), "L")
+        lay = (lay, pts, terang, galaksi)
         _CAK[key] = lay
-    mask, pts = lay
+    mask, pts, terang, galaksi = lay
     base = Image.new("RGB", mask.size, col)
     m = mask.getchannel("A") if alpha >= 0.995 else mask.getchannel("A").point(lambda v: int(v * alpha))
-    img.paste(base, (int(S(cx) - mask.width / 2), int(S(cy) - mask.height / 2)), m)
-    # tepi lembut (rim) + sorot atas sangat halus
+    x0, y0 = int(S(cx) - mask.width / 2), int(S(cy) - mask.height / 2)
+    img.paste(base, (x0, y0), m)
+    # pita Bima Sakti (samar; ikut 'gelap' dan 'bintang')
+    ag = alpha * bintang * clamp(gelap * 1.2) * 0.16
+    if ag > 0.01:
+        gm = galaksi.point(lambda v, a=ag: int(v * a))
+        img.paste(Image.new("RGB", mask.size, mix(STAR, NAVY2, 0.35)), (x0, y0), gm)
     ring_on(img, cx, cy, r, mix(col, WHITE, 0.18), 3, alpha * 0.9)
     if bintang > 0.01:
-        for (x, y, rr, ph) in pts:
+        # paralaks: lapis dekat bergeser paling jauh (hanyut sangat pelan, tanpa lompatan)
+        ox = paralaks * 3.2 * math.sin(tg * 0.11 + 0.4)
+        oy = paralaks * 2.2 * math.cos(tg * 0.09 + 1.1)
+        fac = (0.22, 0.55, 1.0)
+        for (x, y, rr, ph, lp) in pts:
             k = 0.55 + 0.45 * math.sin(tg * (1.3 + ph * 2.0) + ph * 20)
             a = alpha * bintang * (0.35 + 0.65 * k) * clamp(gelap * 1.3)
             if a > 0.03:
-                dot_on(img, x, y, rr, STAR, a)
+                dot_on(img, x + ox * fac[lp], y + oy * fac[lp], rr, STAR, a)
+        for (x, y, rr, ph, warna) in terang:
+            k = 0.7 + 0.3 * math.sin(tg * (0.9 + ph) + ph * 9)
+            a = alpha * bintang * clamp(gelap * 1.3) * k
+            if a > 0.03:
+                xx, yy = x + ox * 0.8, y + oy * 0.8
+                dot_on(img, xx, yy, rr * 2.6, warna, a * 0.16)
+                dot_on(img, xx, yy, rr, mix(warna, WHITE, 0.4), a)
+                g = rr * 3.4
+                line_on(img, (xx - g, yy), (xx + g, yy), warna, 1, a * 0.45)
+                line_on(img, (xx, yy - g), (xx, yy + g), warna, 1, a * 0.45)
 
 
-def garis_meteor(img, p0, p1, u, col=STAR, width=4, alpha=1.0, ekor=0.55):
-    """Garis meteor: kepala bergerak dari p0 ke p1 (u 0..1), ekor memudar di belakang."""
+def garis_meteor(img, p0, p1, u, col=STAR, width=4, alpha=1.0, ekor=0.55, train=False, train_dur=0.6):
+    """Garis meteor: kepala bergerak dari p0 ke p1 (u 0..1), ekor memudar di belakang.
+    train=True: untuk u di (1, 1+train_dur] digambar JEJAK PERSISTEN (ciri Orionid: cepat, 66 km/s,
+    meninggalkan jejak bercahaya yang memudar) - garis penuh yang menipis & meredup, tanpa kepala."""
     if alpha <= 0.01 or u <= 0:
+        return
+    if u > 1.0 and train:
+        f = clamp((u - 1.0) / train_dur)
+        if f >= 1.0:
+            return
+        a = alpha * (1 - f) ** 1.6
+        wd = max(1, width * (0.75 - 0.5 * f))
+        # jejak paling terang di 60-85% lintasan (tempat meteor paling panas)
+        n = 8
+        for i in range(n):
+            a0, a1 = i / n, (i + 1) / n
+            q0 = (p0[0] + (p1[0] - p0[0]) * a0, p0[1] + (p1[1] - p0[1]) * a0)
+            q1 = (p0[0] + (p1[0] - p0[0]) * a1, p0[1] + (p1[1] - p0[1]) * a1)
+            prof = math.exp(-((a0 + a1) / 2 - 0.72) ** 2 / 0.09)
+            line_on(img, q0, q1, mix(col, (170, 200, 255), 0.5 * f), wd, a * (0.25 + 0.75 * prof))
         return
     u = clamp(u)
     hx, hy = p0[0] + (p1[0] - p0[0]) * u, p0[1] + (p1[1] - p0[1]) * u
@@ -340,9 +410,8 @@ def komet(img, cx, cy, s, tg, alpha=1.0, arah=(-0.8, -0.6), ekor=1.0, col=None):
     L = math.hypot(ax, ay) or 1.0
     ax, ay = ax / L, ay / L
     panjang = 260 * s * ekor
-    if panjang > 4:
-        lay, x_inti, yc = _ekor_sprite(D.S(panjang), D.S(34 * s), mix(col, NAVY, 0.18))
-        phi = math.degrees(math.atan2(ay, ax)) + 1.4 * math.sin(tg * 1.7)      # goyang halus
+
+    def _tempel(lay, x_inti, yc, phi, a):
         rot = lay.rotate(-phi, resample=Image.BICUBIC, expand=True)
         # posisi inti setelah rotasi (rotasi mengelilingi pusat sprite)
         vx, vy = x_inti - lay.size[0] / 2, yc - lay.size[1] / 2
@@ -351,9 +420,18 @@ def komet(img, cx, cy, s, tg, alpha=1.0, arah=(-0.8, -0.6), ekor=1.0, col=None):
         px = int(round(D.S(cx) - (rot.size[0] / 2 + rx)))
         py = int(round(D.S(cy) - (rot.size[1] / 2 + ry)))
         m = rot.split()[3]
-        if alpha < 0.995:
-            m = m.point(lambda v, a=alpha: int(v * a))
+        if a < 0.995:
+            m = m.point(lambda v, aa=a: int(v * aa))
         img.paste(rot.convert("RGB"), (px, py), m)
+
+    if panjang > 4:
+        phi0 = math.degrees(math.atan2(ay, ax))
+        # 1) ekor ion: lurus menjauhi Matahari, lebih panjang, tipis, kebiruan (digambar dulu = di belakang)
+        lay_i, xi, yi = _ekor_sprite(D.S(panjang * 1.35), D.S(16 * s), mix((150, 190, 255), NAVY, 0.25))
+        _tempel(lay_i, xi, yi, phi0 - 9.0 + 0.8 * math.sin(tg * 2.3), alpha * 0.6)
+        # 2) ekor debu: lebih lebar, hangat, sedikit melengkung/goyang
+        lay, x_inti, yc = _ekor_sprite(D.S(panjang), D.S(34 * s), mix(col, NAVY, 0.18))
+        _tempel(lay, x_inti, yc, phi0 + 1.4 * math.sin(tg * 1.7), alpha)
     import mesin_v11 as V
     V._glow11(img, cx, cy, 70 * s, mix(col, WHITE, 0.3), alpha * 0.7)
     dot_on(img, cx, cy, 13 * s, WHITE, alpha)

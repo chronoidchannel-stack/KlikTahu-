@@ -3,7 +3,7 @@
 dinamikanya dibuat lebih rata (kompresor + limiter lembut), lalu dinaikkan ke level
 broadcast. Output: build/audio_master.wav (48 kHz stereo) + laporan QC.
 """
-import os, subprocess, sys, wave
+import json, os, subprocess, sys, wave
 import numpy as np
 import imageio_ffmpeg
 
@@ -95,7 +95,61 @@ def tambah_sfx(a, sr):
     return out
 
 
+def ukur_lufs(path):
+    """Integrated loudness & true-peak (EBU R128) lewat ffmpeg loudnorm pass-1."""
+    r = subprocess.run([FF, "-i", path, "-af", "loudnorm=I=-14:TP=-1.5:print_format=json", "-f", "null", "-"],
+                       capture_output=True, text=True)
+    e = r.stderr
+    j = json.loads(e[e.rfind("{"):e.rfind("}") + 1])
+    return float(j["input_i"]), float(j["input_tp"])
+
+
+def tulis(path, a, sr):
+    with wave.open(path, "wb") as w:
+        w.setnchannels(2); w.setsampwidth(2); w.setframerate(sr)
+        w.writeframes((np.clip(a, -1, 1) * 32767.0).astype("<i2").tobytes())
+
+
+def main_v12():
+    """Master v12 'untuk telinga manusia': VO sudah dirapikan vo_manusia.py (-16 LUFS, tanpa pemotongan),
+    jadi di sini TIDAK ada kompresor/EQ/loudnorm dinamis lagi. Hanya: HPF 40 Hz -> gain LINEAR VO ke -16 LUFS
+    -> + SFX (duck) + ambient -> gain LINEAR campuran ke -14 LUFS -> limiter true-peak -1.5 dBTP."""
+    tmp = os.path.join(BUILD, "_master_tmp.wav")
+    run([FF, "-y", "-i", SRC, "-af", "highpass=f=40:poles=1", "-ar", "48000", "-ac", "2", tmp])
+    i_vo, tp_vo = ukur_lufs(tmp)
+    a_vo, sr = read(tmp)
+    g_vo = -16.0 - i_vo
+    a_vo *= 10 ** (g_vo / 20.0)
+    print(f"  v12 VO stem: {i_vo:.1f} LUFS -> gain linear {g_vo:+.1f} dB -> -16 LUFS (TP {tp_vo + g_vo:.1f})")
+    a = tambah_sfx(a_vo, sr)
+    tulis(tmp, a, sr)
+    i_mix, tp_mix = ukur_lufs(tmp)
+    g_mix = TARGET_LUFS - i_mix
+    lim = 10 ** (-1.5 / 20)
+    run([FF, "-y", "-i", tmp, "-af", f"volume={g_mix:.3f}dB,alimiter=limit={lim:.4f}:attack=3:release=80:level=false:asc=true",
+         "-ar", "48000", "-ac", "2", OUT])
+    a_out, _ = read(OUT)
+    i_out, tp_out = ukur_lufs(OUT)
+    # stem VO dengan gain yang sama (tanpa limiter) -> qc_mp4 menilai keutuhan VO per adegan
+    tulis(os.path.join(BUILD, "audio_master_vo.wav"), a_vo * 10 ** (g_mix / 20.0), sr)
+    print(f"master -> {os.path.normpath(OUT)}")
+    print(f"  campuran {i_mix:.1f} LUFS -> gain linear {g_mix:+.1f} dB | hasil {i_out:.1f} LUFS, TP {tp_out:.1f} dBTP, "
+          f"limiter bekerja maks {max(0.0, tp_mix + g_mix + 1.5):.1f} dB | panjang {len(a_out) / sr:.2f}s")
+    clip = int((np.abs(a_out) >= 0.9995).sum())
+    print(f"  sample clipping: {clip}")
+    if clip > 40 or abs(i_out - TARGET_LUFS) > 1.0:
+        print("PERINGATAN: master v12 di luar toleransi")
+        sys.exit(1)
+    print("AUDIO MASTER v12 OK ✔")
+
+
 def main():
+    try:
+        _cj = json.load(open(os.path.join(BASE, "content.json")))
+    except Exception:                      # noqa: BLE001
+        _cj = {}
+    if str(_cj.get("mesin", "")).lower() == "v12" and os.environ.get("KT_MASTER_V12", "1") == "1":
+        return main_v12()
     tmp = os.path.join(BUILD, "_master_tmp.wav")
     # kompresor lembut 2 tahap + limiter: menjaga cerita tetap tenang tapi terdengar penuh
     chain = ("acompressor=threshold=-20dB:ratio=2.4:attack=14:release=260:makeup=2.2,"

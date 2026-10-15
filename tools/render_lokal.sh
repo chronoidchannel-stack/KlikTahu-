@@ -44,7 +44,7 @@ if [ "$MODE" = shorts ]; then DIR="episodes/$SLUG"; else DIR="long/$SLUG"; fi
 
 # --- guard: audio mentah memang tidak disimpan di repo ----------------------
 shopt -s nullglob
-RAW=( "$DIR"/audio_raw/*.wav )
+RAW=( "$DIR"/audio_raw/*.wav "$DIR"/audio_raw/*.flac "$DIR"/audio_raw/*.mp3 )
 if [ "${#RAW[@]}" -eq 0 ]; then
   die "audio mentah kosong: $DIR/audio_raw/ belum diisi.
        Audio sengaja tidak disimpan di repo — lihat docs/audio-manifest.md
@@ -71,11 +71,17 @@ echo "==========================================================================
 # ============================================================ 1) audio + naskah
 mkdir -p audio audio_proc build dist
 cp "$DIR/content.json" .
-cp "$DIR"/audio_raw/*.wav audio/
+cp "${RAW[@]}" audio/
 export KT_BUILD=build
 
-echo "--- process_audio.py (rapikan VO + QC keutuhan)"
-SPEED="$SPEED" TARGET_WPS="${TARGET_WPS:-1.90}" python3 process_audio.py
+MESIN="$(python3 -c 'import json;print(str(json.load(open("content.json")).get("mesin","")).lower())')"
+if [ "$MESIN" = v12 ] && [ "${KT_VO_CHAIN:-v12}" = v12 ]; then
+  echo "--- vo_manusia.py (v12: VO untuk telinga manusia - tanpa atempo/pemotongan, QC ASR)"
+  python3 vo_manusia.py --asr
+else
+  echo "--- process_audio.py (rapikan VO + QC keutuhan)"
+  SPEED="$SPEED" TARGET_WPS="${TARGET_WPS:-1.90}" python3 process_audio.py
+fi
 echo "--- build_timeline.py"
 MAXDUR="${MAXDUR:-180}" python3 build_timeline.py
 if python3 -c 'import json,sys; sys.exit(0 if str(json.load(open("content.json")).get("mesin","")).lower()=="v12" else 1)'; then

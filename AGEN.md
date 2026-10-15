@@ -681,3 +681,63 @@ yang sama persis di akhir adegan N dan awal adegan N+1 (atau di-ease 0,6-1,0 s).
 thump, riser, tetes, retak, hujan, angin, room tone), QC baru (`qc_audio.py`, `qc_sync.py`, `check_layout --beban`,
 `qc_mp4 --loop`). Semua wajib punya `--uji`; render tetap lokal di sandbox (background), bukan Actions.
 
+
+## 17. SESI 15 OKT 2026 (malam) — Ep50 DIBUAT ULANG (v2): VO "UNTUK TELINGA MANUSIA" + visual kedalaman
+
+**Keluhan pemilik atas v1:** VO terdengar "terpotong". **Akar masalah yang terbukti (diukur, bukan ditebak):**
+1. **Sumber TTS diminta sebagai `.mp3` = 32 kb/s mono 24 kHz** -> semua di atas ~8 kHz hilang (pita 8-11 kHz -37 dB vs
+   -14 dB pada WAV) + artefak codec yang terdengar "berkedip/terpotong" setelah dinaikkan +9 dB dan diberi treble boost.
+   **WAJIB: minta TTS sebagai `.wav`** (PCM 16-bit 24 kHz, lebar pita penuh). Jangan pernah lagi `.mp3` untuk sumber VO.
+2. `process_audio.py` (rantai lama): `add_breath` menyisipkan **hening digital murni** (120 ms nol) di jeda -> "lubang";
+   `silenceremove -50 dB` + `potong_napas` (-48 dB, fade 10/20 ms) memakan onset lembut (S/H) dan ekor vokal;
+   `atempo 0.93` (WSOLA) menambah tekstur patah. Klip TTS sendiri juga punya hening digital 300-700 ms di dalam jeda.
+3. Master lama: 2 kompresor + EQ + treble + `loudnorm` dinamis + limiter di atas VO yang sudah diproses -> "memompa".
+
+**Solusi (dipakai semua episode v12 mulai Ep50 v2):** `vo_manusia.py` menggantikan `process_audio.py` bila
+`content.json` `"mesin": "v12"` (otomatis di `tools/render_lokal.sh`; paksa lama dengan `KT_VO_CHAIN=lama`):
+decode 48 kHz (soxr) -> de-esser spektral lembut (5,5-10 kHz, maks 4 dB, hanya saat desis dominan) + EQ statis sangat
+halus (-1 dB @300 Hz, +0,8 dB @3 kHz, +1 dB rak >8,5 kHz) -> HPF 65 Hz -> kompresor perata 2:1 (lutut 8 dB) -> gain
+LINEAR -> kompresor puncak 3:1 (>-8 dBFS, attack 1 ms) -> gain LINEAR ke -16 LUFS -> limiter TP -2 dB (hanya menyentuh
+1-2 ms transien per klip) -> trim HANYA hening sejati (-55 dBFS) dengan pra-gulir 120 ms / pasca-gulir 350 ms + fade
+raised-cosine 30/150 ms -> **nada ruang merah muda -63 dBFS** di seluruh klip (menghapus "vakum" digital) -> dither
+TPDF 16-bit. **Tanpa atempo, tanpa hening sisipan, tanpa silenceremove.** QC per klip: onset >= 100 ms, ekor >= 300 ms,
+0 ms hening digital, puncak <= -2 dBFS, -16 LUFS +-1, dan `--asr` (faster-whisper small): kata PERTAMA & TERAKHIR
+dikenali + kemiripan transkrip >= 0,9 (angka dinormalkan: "dua ribu enam puluh satu" == "2061"; nama diri boleh beda
+ejaan). Laporan: `build/vo_qc.json`. `master_audio.py` v12 (`main_v12`): HPF 40 Hz -> gain linear VO ke -16 LUFS -> +SFX
+(duck) + ambient -> gain linear campuran ke -14 LUFS -> limiter TP -1,5 dB; **tidak ada kompresor/EQ lagi** (matikan
+dengan `KT_MASTER_V12=0`). `build_audio.py`: batas "awal lambat" 0,55 s untuk `vo_chain: v12` (napas alami disimpan).
+Irama VO diatur dari **naskah** (elipsis/koma/titik dua), bukan time-stretch. Parameter timeline v2: `lead_in` 0,2,
+`tail_intro` 0,45, `tail_fact` 0,5, `tail_outro` 0,9 (jeda antar babak ~1,0-1,1 s termasuk napas).
+
+**Visual v2 (mesin_v12 + ep50):** `cakram_langit` kini punya kedalaman: bintang 3 lapis (jauh/tengah/dekat) dengan
+paralaks berbeda, 5 bintang terang berwarna (oranye Betelgeuse / biru Rigel) dengan glint, pita Bima Sakti samar (derau
+numpy + pita Gaussian + celah gelap, ter-cache); `komet` punya **ekor ion kebiruan lurus** di belakang ekor debu hangat;
+`garis_meteor(train=True)` = **jejak persisten** memudar 0,37 s (ciri Orionid 66 km/s) dipakai `meteor_acak`;
+`pijar_cakrawala` = pijar hangat memudar ke atas dari garis cakrawala (nol di tepi, bukan kotak); micro-climax: kilat
+langit 0,16 s + riak ganda (3 cincin, tunda 0/0,14/0,30 s) + butir sungai debu berdenyut. Grain diturunkan `KT_GRAIN=2.4`
+(lebih bersih setelah re-encode YouTube). Sweep 0,25 s SS 0,5 bersih; frame batas diperiksa.
+
+**Batas alat:** `generate_speech` maksimal 10 klip per giliran -> untuk 7 klip + uji format, sisa klip dibuat di giliran
+berikutnya. Simpan WAV sumber ke Drive (zip) segera setelah dibuat (sandbox bisa reset).
+
+**Keamanan akun GitHub (diterapkan 15 Okt malam):** workflow `selftest.yml` kini **hanya `workflow_dispatch`** (tidak ada
+pemicu push/PR -> 0 menit Actions otomatis); semua commit beridentitas pemilik (`chronoidchannel-stack@users.noreply.github.com`),
+satu commit per sesi dengan `[skip ci]`, tidak ada biner/audio/video/rahasia di repo (`.gitignore` `episodes/*/audio_raw/*`),
+hasil produksi hanya di Google Drive. Disarankan repo dijadikan **private** (Settings -> Danger zone) - perlu pemilik.
+Token PAT: scope minimal `repo` (contents), masa berlaku pendek, kirim lewat file `token.txt` di workspace, dihapus setelah
+dipakai, dan **dicabut** di GitHub setelah sesi.
+
+**RUNBOOK lanjutan Ep50 v2 (giliran berikutnya, urut):**
+1. Pulihkan sandbox bila reset: `git clone` repo -> unduh bundle Drive (Project_Docs) -> `git fetch <bundle> main:ep50v2 &&
+   git reset --hard ep50v2` -> `pip install -r requirements.txt faster-whisper` -> unduh `Ep50_VO_v2_wav_bagian1.zip`
+   (Drive/Shorts/Ep50) ke `episodes/ep50_orionid/audio_raw/`.
+2. `generate_speech` voice-00 **format .wav** untuk `f1, f2, f3, outro` dengan teks PERSIS `content.json` `vo` -> taruh di
+   `audio_raw/` -> zip `Ep50_VO_v2_wav_bagian2.zip` ke Drive.
+3. `tools/render_lokal.sh shorts ep50_orionid prep` (vo_manusia --asr harus "SEMUA BERSIH", build_audio "AUDIO OK",
+   master v12 OK, check_layout bersih).
+4. Spot-check frame batas +-0,08 s + sweep 0,25 s SS 0,5 (lihat §16) -> `start_process` render penuh (~80-90 menit;
+   poll `build/render.log`, sleep <= 600 s) -> `qc_mp4.py`, `qc_loop.py` (>= 0,98), lembar frame akhir.
+5. Thumbnail dari frame render (`render.py --times`) -> Drive; mp4 (< 100 MB) + m4a master + SIAP_TEMPEL ke Drive
+   `Shorts/Ep50_Orionid/` (nama `_v2`), salinan thumbnail/metadata ke folder Thumbnails/Metadata; v1 dipindah ke
+   subfolder `arsip_v1`.
+6. Commit `[skip ci]` (identitas pemilik) + bundle baru ke Drive; push hanya bila `token.txt` tersedia; ingatkan cabut token.

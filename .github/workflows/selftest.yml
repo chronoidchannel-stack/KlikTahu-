@@ -6,10 +6,10 @@ name: Selftest (uji ringan, tanpa render video)
 #
 # Render video dijalankan lokal: `tools/render_lokal.sh <shorts|long> <slug>`.
 
+# 15 Okt 2026: HANYA manual (workflow_dispatch). Tidak ada pemicu push/PR sama sekali -> nol menit Actions
+# otomatis, nol risiko akun ditandai karena pola pemakaian. Jalankan uji lokal: `python3 -m compileall -q . && for m in
+# mesin_v12 mesin_v12_ep50 vo_manusia; do python3 $m.py --uji 2>/dev/null || python3 $m.py; done`.
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch: {}
 
 permissions:

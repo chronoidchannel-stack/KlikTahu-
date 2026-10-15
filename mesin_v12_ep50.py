@@ -13,6 +13,7 @@ import math
 import diagrams as D
 import mesin_v11 as V
 import mesin_v12 as M
+from PIL import Image
 from diagrams import (INK, CREAM, WHITE, MUTED, mix, seg, clamp, esmooth, eob, eo, font, paste_c,
                       rrect_on, line_on, dot_on, ring_on, poly_on)
 from mesin_v12 import (ease12, esm, eio, t_kata, cues, cakram_langit, garis_meteor, komet, jam, kompas,
@@ -39,11 +40,34 @@ def _hor_x(y):
     return math.sqrt(max(0.0, R * R - dy * dy))
 
 
+_PIJAR = {}
+
+
+def pijar_cakrawala(img, alpha, hw, tinggi=190):
+    """Pijar atmosfer hangat yang memudar ke atas dari garis cakrawala (cahaya kota di kejauhan)."""
+    if alpha <= 0.01:
+        return
+    key = (int(hw), int(tinggi), round(D.SS, 3))
+    lay = _PIJAR.get(key)
+    if lay is None:
+        import numpy as np
+        w, h = int(D.S(hw * 2)), int(D.S(tinggi))
+        yy, xx = np.mgrid[0:h, 0:w].astype("float32")
+        v = (yy / h) ** 2.4                                       # terang di bawah (cakrawala), hilang di atas
+        u = np.exp(-((xx - w / 2) / (w * 0.32)) ** 2)             # lebih terang di tengah
+        u *= np.clip(1 - (np.abs(xx - w / 2) / (w / 2)) ** 3, 0, 1)  # nol di tepi (tanpa garis vertikal)
+        lay = Image.fromarray((np.clip(v * u, 0, 1) * 255).astype("uint8"), "L")
+        _PIJAR[key] = lay
+    m = lay.point(lambda v, a=alpha * 0.22: int(v * a))
+    img.paste(Image.new("RGB", lay.size, mix(ORANYE, KUNING, 0.45)), (int(D.S(CX - hw)), int(D.S(Y_HOR)) - lay.size[1]), m)
+
+
 def cakrawala(img, tg, alpha=1.0, sorot=0.0, orang=0.0, orang_tanya=0.0):
     """Tanah + atap rumah di dasar cakram (dunia penonton). sorot = kilau 'rumahmu'."""
     if alpha <= 0.01:
         return
     hw = _hor_x(Y_HOR)
+    pijar_cakrawala(img, alpha, hw)
     # tanah: segmen cakram di bawah cakrawala
     pts = [(CX - hw, Y_HOR)]
     for i in range(1, 24):
@@ -97,10 +121,10 @@ def meteor_acak(img, tg, t0, t1, laju, alpha, radiant=None, seed=1, panjang=150,
         return
     periode = 1.0 / laju
     k0 = int((tg - t0) / periode) - 1
-    for k in range(max(0, k0), k0 + 2):
+    for k in range(max(0, k0 - 1), k0 + 2):
         ts = t0 + k * periode + 0.37 * periode * math.sin(k * 7.3 + seed)
         u = (tg - ts) / 0.62
-        if u <= 0 or u >= 1:
+        if u <= 0 or u >= 1.6:
             continue
         rnd = (math.sin(k * 12.9 + seed * 3.1) * 43758.5) % 1.0
         rnd2 = (math.sin(k * 7.1 + seed * 1.7) * 12345.6) % 1.0
@@ -116,7 +140,10 @@ def meteor_acak(img, tg, t0, t1, laju, alpha, radiant=None, seed=1, panjang=150,
         # hanya di dalam cakram & di atas cakrawala
         if math.hypot(p1[0] - CX, p1[1] - CY) > R - 10 or p1[1] > Y_HOR - 8:
             continue
-        garis_meteor(img, p0, p1, u, col, 3, alpha * (1 - u) ** 0.5)
+        if u <= 1.0:
+            garis_meteor(img, p0, p1, u, col, 3, alpha * (0.7 + 0.3 * u))
+        else:                                                   # jejak persisten (train) memudar 0,37 s
+            garis_meteor(img, p0, p1, u, col, 3, alpha * 0.8, train=True, train_dur=0.6)
 
 
 def teks(img, sc, accent, tl, al, t0, text=None, hl=None, fsz=58, y=Y_TXT, maxw=820):
@@ -498,7 +525,10 @@ def sc_orbit50(img, d, sc, tl, dur, tg, accent, al, dy):
     M.set_keluar(tl, dur, ada_lanjutan=True)
     c = cues(sc, dur, CUES["orbit50"])
     masuk = ease12(clamp(tl / 1.0), 0.05, 0.04)
-    cakram_langit(img, CX, CY, R, tg, 1.0, 1.0, 1.0 - 0.2 * esm(tl / 0.8))
+    # kilat payoff: seluruh langit menyala sesaat tepat pada 'menyeberangi' (sinkron thump), lalu pulih
+    tc0 = tl - c["menyeberangi"]
+    kilat = math.exp(-tc0 / 0.16) if tc0 >= 0 else 0.0
+    cakram_langit(img, CX, CY, R, tg, 1.0 - 0.45 * kilat, 1.0, 1.0 - 0.2 * esm(tl / 0.8))
     komet(img, KOMET_P[0], KOMET_P[1], 1.0, tg, 0.22 * (1 - esm(tl / 0.6)), (-0.8, -0.6), 1.0)
     cakrawala(img, tg, 1 - esm(tl / 0.6), orang=1.0)
     s = 0.25 + 0.75 * clamp(masuk)
@@ -565,7 +595,17 @@ def sc_orbit50(img, d, sc, tl, dur, tg, accent, al, dy):
         tt = tl - t_cross
         V._partikel11(img, pc[0], pc[1], tt, mix(KUNING, WHITE, 0.4), 1.0, n=16, jarak=160)
         V._glow11(img, pc[0], pc[1], 150, KUNING, 0.6 * (1 - esm(tt / 1.5)) + 0.18)
-        ring_on(img, pc[0], pc[1], 22 + 70 * esm(tt / 0.8), KUNING, 3, (1 - esm(tt / 0.8)))
+        # riak ganda (gelombang kejut) + riak ketiga lebar & samar: payoff yang terbaca sampai ke tepi cakram
+        for (tunda, rmax, wd) in ((0.0, 70, 3), (0.14, 120, 2), (0.30, 230, 2)):
+            q = esm((tt - tunda) / 0.8)
+            if 0 < q < 1:
+                ring_on(img, pc[0], pc[1], 22 + rmax * q, KUNING, wd, (1 - q) ** 1.3)
+        # sungai debu 'tersentuh': butir di sekitar persilangan berdenyut terang lalu tenang
+        for i in range(0, 96, 2):
+            p = el[i]
+            if _dalam(p) and math.hypot(p[0] - pc[0], p[1] - pc[1]) < 150 * s:
+                jit = 9 * math.sin(i * 1.7) * s
+                dot_on(img, p[0] + jit, p[1] - jit * 0.6, 4.0, WHITE, 0.6 * math.exp(-tt / 0.5))
         for k in range(6):
             a = ang_cross + 0.4 + k * 0.5
             uu = esm((tt - 0.1 * k) / 0.6)

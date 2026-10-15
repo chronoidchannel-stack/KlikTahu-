@@ -79,7 +79,7 @@ Prioritas: **VO -> SFX sinematik -> tekstur ambient halus**. Tidak ada BGM, inst
 
 | Lapisan | Level | Aturan |
 |---|---:|---|
-| VO | -16 LUFS short-term; puncak -3 dBTP | TTS voice-00, SPEED 1,09, tanpa napas dipotong kasar; cek integritas (0 ms hilang) sebelum render |
+| VO | -16 LUFS per klip; puncak -2 dBTP | TTS voice-00 **sumber .wav (PCM)**, rantai `vo_manusia.py`: tanpa atempo, tanpa hening sisipan, pra-gulir 120 ms / pasca 350 ms, nada ruang -63 dBFS; QC ASR kata pertama & terakhir |
 | SFX | -16 dB dasar, duck -7 dB di bawah VO | satu SFX per BEAT: transisi, reveal, impact, gerak, penekanan kata; jenis mengikuti arah & materi gerak |
 | Ambient | -30 s.d. -34 dB | tekstur halus sesuai dunia episode (hujan ringan, angin, ruang); fade 20 ms zero-crossing di awal & akhir agar loop tanpa klik |
 | Master | -14 LUFS integrated, true peak -1 dBTP | `master_audio.py`; tidak ada clipping |
@@ -88,7 +88,7 @@ Katalog SFX v12 (semua disintesis di `sfx.py`, tanpa unduhan berlisensi): whoosh
 
 Sinkron: BEAT dikunci ke **kata** (hasil `align()`), bukan ke fraksi adegan. Toleransi sinkron +- 40 ms.
 
-Format audio: TTS dihasilkan sebagai **.m4a/.mp3**, dikonversi ke WAV 48 kHz **hanya sebagai perantara internal** di pipeline. Deliverable audio di Drive = **.m4a (AAC 256k)**. **Tidak pernah mengirim WAV ke pemilik.**
+Format audio: TTS **diminta sebagai .wav PCM** (sumber lebar pita penuh; `.mp3` dari TTS hanya 32 kb/s dan terdengar terpotong), diproses sebagai WAV 48 kHz **hanya sebagai perantara internal** di pipeline. Deliverable audio di Drive = **.m4a (AAC 256k)**. **Tidak pernah mengirim WAV ke pemilik.**
 
 ---
 

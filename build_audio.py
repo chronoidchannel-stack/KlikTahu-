@@ -63,6 +63,13 @@ def main():
     db = 20 * np.log10(rms + 1e-9)
     print(f"{'scene':7s} {'VO mulai':>9s} {'VO akhir':>9s} {'ekor hening':>12s}  QC")
     langgar = []
+    # v12 (vo_manusia.py): klip sengaja menyimpan pra-gulir + tarikan napas alami sebelum kata pertama,
+    # jadi batas "awal lambat" dilonggarkan 0.35 -> 0.55 s.
+    try:
+        _v12 = str(json.load(open(os.path.join(BASE, "content.json"))).get("vo_chain", "")).lower() == "v12"
+    except Exception:                      # noqa: BLE001
+        _v12 = False
+    st_maks = 0.55 if _v12 else 0.35
     for sc in tl["scenes"]:
         s, e = int(sc["vo_at"] / 0.02), int((sc["vo_at"] + sc["vo_dur"]) / 0.02)
         seg = db[s:e]
@@ -75,7 +82,7 @@ def main():
         gap = (nxt - (sc["vo_at"] + en)) if nxt else 99
         # syarat keras: VO tidak terpotong, mulai dekat lead_in, dan tidak bertabrakan
         fits = (sc["vo_at"] + en) <= (sc["start"] + sc["dur"] + 0.05)
-        ok = tail > 0.045 and gap > 0.25 and st < 0.35 and fits
+        ok = tail > 0.045 and gap > 0.25 and st < st_maks and fits
         if not ok:
             langgar.append(sc["id"] + (" (VO lewat batas scene)" if not fits else
                                        " (jeda sempit)" if gap <= 0.25 else " (potong/awal lambat)"))
