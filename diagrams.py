@@ -201,7 +201,9 @@ def paste_c(img, cx, cy, text, f, fill, alpha=1.0, scale=1.0, dy=0.0):
     dd.text((lay.width / 2, lay.height / 2), text, font=f, fill=fill + (255,), anchor="mm")
     if scale != 1.0:
         lay = lay.resize((max(1, int(lay.width * scale)), max(1, int(lay.height * scale))), Image.LANCZOS)
-    img.paste(lay, (int(S(cx) - lay.width / 2), int(S(cy + dy) - lay.height / 2)), lay)
+    # v12 fix (15 Okt 2026): alpha dulu diabaikan -> teks label "pop" alih-alih memudar; kini diterapkan
+    m = lay if alpha >= 0.995 else lay.getchannel("A").point(lambda v: int(v * clamp(alpha)))
+    img.paste(lay.convert("RGB") if alpha < 0.995 else lay, (int(S(cx) - lay.width / 2), int(S(cy + dy) - lay.height / 2)), m)
 
 
 def paste_r(img, x, cy, text, f, fill, alpha=1.0, dy=0.0):
@@ -213,7 +215,8 @@ def paste_r(img, x, cy, text, f, fill, alpha=1.0, dy=0.0):
     lay = Image.new("RGBA", (int(S(w_ + 20)), int(S(h_ * 1.7))), (0, 0, 0, 0))
     dd = ImageDraw.Draw(lay)
     dd.text((0, lay.height / 2), text, font=f, fill=fill + (255,), anchor="lm")
-    img.paste(lay, (int(S(x)), int(S(cy + dy) - lay.height / 2)), lay)
+    m = lay if alpha >= 0.995 else lay.getchannel("A").point(lambda v: int(v * clamp(alpha)))
+    img.paste(lay.convert("RGB") if alpha < 0.995 else lay, (int(S(x)), int(S(cy + dy) - lay.height / 2)), m)
 
 
 def pill(img, x, y, text, f, fill, outline=None, bg=None, alpha=1.0, pad=30, hgt=None, dot=False):

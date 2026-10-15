@@ -622,7 +622,8 @@ def sc_orbit50(img, d, sc, tl, dur, tg, accent, al, dy):
             chip(img, 300 + k * 160, Y_ALAT - 44, th, KUNING if th == "2026" else mix(INK, CREAM, 0.2), kk, tl - c["oktober"] - 0.12 * k, fsz=24)
         label(img, 540, Y_ALAT + 6, "SETIAP OKTOBER, TANGGAL YANG SAMA", mix(INK, CREAM, 0.15), qt, fsz=22)
     # pemicu komentar
-    M.stiker(img, 540, Y_ALAT + 62, "TULIS KOTAMU DI KOMENTAR", 1.0, tl - c["kota"], bg=HIJAU, fsz=26, rot=-3)
+    # persisten melintasi batas ke outro (outro menggambarnya lagi di posisi sama) -> TANPA faktor KELUAR
+    V._stiker11(img, 540, Y_ALAT + 62, "TULIS KOTAMU DI KOMENTAR", 1.0, tl - c["kota"], bg=HIJAU, fsz=26, rot=-3)
     M.bab(img, sc, accent, tl, 1.0)
     chip_tanggal(img, 1.0)
     teks(img, sc, accent, tl, 1.0, 0.10)

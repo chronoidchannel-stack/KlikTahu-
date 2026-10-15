@@ -741,3 +741,11 @@ dipakai, dan **dicabut** di GitHub setelah sesi.
    `Shorts/Ep50_Orionid/` (nama `_v2`), salinan thumbnail/metadata ke folder Thumbnails/Metadata; v1 dipindah ke
    subfolder `arsip_v1`.
 6. Commit `[skip ci]` (identitas pemilik) + bundle baru ke Drive; push hanya bila `token.txt` tersedia; ingatkan cabut token.
+
+**Pelajaran render v2 (15 Okt malam):** (a) `diagrams.paste_c/paste_r` **mengabaikan alpha** sejak awal proyek -> semua
+label teks polos "pop" alih-alih memudar (termasuk saat KELUAR). Diperbaiki: alpha kini diterapkan ke kanal A. Episode
+lama tidak perlu dirender ulang. (b) Elemen yang sengaja persisten melintasi batas adegan (stiker "TULIS KOTAMU" f5 ->
+outro) harus digambar dengan primitif mentah (`V._stiker11`) tanpa faktor KELUAR, kalau tidak ia memudar lalu muncul
+lagi (kedip). (c) Durasi v2 123,7 s -> VBITRATE 5900k agar mp4 < 100 MB (batas `upload_file`); di atas itu perlu
+`initiate_resumable_upload`. (d) Semua 62 CUE kata terselesaikan dari `kata.json` (periksa dengan skrip kecil: tidak boleh
+ada fallback fraksi sebelum render).
