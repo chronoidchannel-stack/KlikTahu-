@@ -1,7 +1,7 @@
-# ANALISIS v5 REAL-TIME (2026-09-24)
+# ANALISIS v5 REAL-TIME (2026-10-15)
 
 Mode: **LIVE (sapuan autocomplete Google+YouTube, BFS kedalaman-2)**
-Permintaan: 591 | Frasa unik: 2324 | Baseline velocity: hasil_mendalam_20260923.json
+Permintaan: 573 | Frasa unik: 2302 | Baseline velocity: hasil_mendalam_20260924.json
 
 `skor_views v5` = dasar v4.2 (jml+kuat+yt*2+vis*0,8+niat*0,6+sains*2+kom*0,5)
 **+ velocity*4** (permintaan bertambah sejak snapshot terakhir; frasa baru dihitung)
@@ -10,43 +10,44 @@ Status SEGAR otomatis dari pustaka/ (Ep21-37) - bug 'sudah dibahas' v4.2 tuntas.
 
 | # | tema | jml | kuat | yt | velocity | frasa BARU | momen | skor_views v5 | status |
 |---:|---|---:|---:|---:|---:|---:|---|---:|---|
-| 1 | mata | 100 | 69 | 63 | ▲8.18 | 8 | - | **356.5** | SUDAH Ep31 |
-| 2 | baterai & hp | 90 | 30 | 70 | ▲15.5 | 8 | - | **338.4** | SUDAH Ep38 |
-| 3 | perut & pencernaan | 84 | 44 | 55 | ▲8.75 | 8 | - | **311.1** | SUDAH Ep28 |
-| 4 | mimpi & tidur | 82 | 44 | 52 | ▲11.82 | 8 | - | **291.2** | SUDAH Ep21/Ep25 |
-| 5 | gigi & mulut | 80 | 59 | 48 | ▲2.57 | 5 | - | **288.4** | SUDAH Ep30 |
-| 6 | kucing | 50 | 29 | 45 | ▲12.85 | 8 | - | **250.6** | SUDAH Ep23 |
-| 7 | gerhana | 59 | 43 | 45 | ▲10.51 | 8 | - | **249.6** | SUDAH Ep40 |
-| 8 | hujan & awan | 56 | 50 | 33 | ▲10.56 | 8 | puncak musim hujan | **238.8** | SUDAH Ep33 |
-| 9 | kram & kesemutan | 57 | 45 | 39 | ▲7.83 | 8 | - | **218.4** | SUDAH Ep29 |
-| 10 | meteor & komet | 39 | 31 | 29 | ▲19.5 | 8 | Orionids | **215.4** | SUDAH Ep39 |
-| 11 | pusing & migrain | 52 | 45 | 33 | ▲5.24 | 8 | - | **192.3** | SUDAH Ep36 |
-| 12 | situs misteri indonesia | 50 | 33 | 40 | ▲5.25 | 8 | - | **192.1** | SUDAH Ep44 |
-| 13 | kulit | 53 | 40 | 35 | ▲2.08 | 4 | - | **183.3** | SUDAH Ep37 |
-| 14 | internet & sinyal | 48 | 26 | 34 | ▲5.26 | 8 | - | **176.2** | SUDAH Ep42 |
-| 15 | megalodon | 40 | 35 | 27 | ▲2.61 | 5 | - | **168.0** | SUDAH Ep46 |
-| 16 | menangis & emosi | 38 | 31 | 26 | ▲6.46 | 8 | - | **156.7** | SEGAR |
-| 17 | listrik & magnet | 38 | 36 | 23 | ▲4.81 | 8 | - | **155.0** | SUDAH Ep42L |
-| 18 | bintang & galaksi | 39 | 32 | 25 | ▲4.8 | 8 | - | **149.6** | SUDAH Ep49 |
+| 1 | perut & pencernaan | 89 | 41 | 58 | ▲14.83 | 8 | - | **345.2** | SUDAH Ep28 |
+| 2 | mata | 93 | 54 | 57 | ▲12.59 | 8 | - | **338.3** | SUDAH Ep31 |
+| 3 | baterai & hp | 88 | 28 | 67 | ▲16.97 | 8 | - | **331.3** | SUDAH Ep38 |
+| 4 | gigi & mulut | 76 | 50 | 46 | ▲4.51 | 8 | - | **281.4** | SUDAH Ep30 |
+| 5 | kucing | 52 | 30 | 48 | ▲14.93 | 8 | - | **271.9** | SUDAH Ep23 |
+| 6 | hujan & awan | 57 | 45 | 34 | ▲13.58 | 8 | puncak musim hujan | **248.9** | SUDAH Ep33 |
+| 7 | mimpi & tidur | 72 | 33 | 44 | ▲8.62 | 8 | - | **243.9** | SUDAH Ep21/Ep25 |
+| 8 | kram & kesemutan | 59 | 45 | 40 | ▲11.34 | 8 | - | **236.9** | SUDAH Ep29 |
+| 9 | meteor & komet | 39 | 31 | 29 | ▲19.5 | 8 | Orionids | **218.9** | SUDAH Ep39 |
+| 10 | pusing & migrain | 54 | 39 | 34 | ▲10.79 | 8 | - | **213.1** | SUDAH Ep36 |
+| 11 | gerhana | 53 | 34 | 39 | ▲8.36 | 8 | - | **212.8** | SUDAH Ep40 |
+| 12 | situs misteri indonesia | 50 | 33 | 40 | ▲5.75 | 8 | - | **193.1** | SUDAH Ep44 |
+| 13 | menangis & emosi | 40 | 31 | 27 | ▲9.04 | 8 | - | **171.4** | SEGAR |
+| 14 | kulit | 47 | 37 | 33 | ▲1.46 | 3 | - | **168.3** | SUDAH Ep37 |
+| 15 | megalodon | 39 | 34 | 25 | ▲3.58 | 7 | - | **166.0** | SUDAH Ep46 |
+| 16 | uban & rambut | 49 | 28 | 31 | ▲4.48 | 8 | - | **161.1** | antrean lama |
+| 17 | internet & sinyal | 43 | 27 | 27 | ▲4.63 | 8 | - | **153.3** | SUDAH Ep42 |
+| 18 | matahari | 33 | 20 | 27 | ▲7.07 | 8 | - | **152.9** | SUDAH Ep45 |
 | 19 | es & salju | 36 | 23 | 28 | ▲6.44 | 8 | - | **149.6** | SEGAR |
-| 20 | matahari | 32 | 21 | 27 | ▲6.02 | 8 | - | **147.9** | SUDAH Ep45 |
+| 20 | hantu & supranatural | 38 | 33 | 26 | ▲3.47 | 7 | Halloween | **148.8** | SUDAH Ep41 |
 
 ## TOP 3 SEGAR (kandidat episode berikutnya)
-1. **menangis & emosi** - skor_views v5 156.7 (velocity 6.46, momen -) -> draf: `DRAFT_METADATA_menangis-emosi.md`
-   contoh frasa: `kenapa kau menangis setelah mengetahui identitasku` · `kenapa nangis` · `kenapa orang koma menangis` · `kenapa gampang stress`
+1. **menangis & emosi** - skor_views v5 171.4 (velocity 9.04, momen -) -> draf: `DRAFT_METADATA_menangis-emosi.md`
+   contoh frasa: `kenapa kau menangis setelah mengetahui identitasku` · `kenapa nangis` · `kenapa gampang stres kenapa ya` · `kenapa gampang stress`
 2. **es & salju** - skor_views v5 149.6 (velocity 6.44, momen -) -> draf: `DRAFT_METADATA_es-salju.md`
-   contoh frasa: `kenapa di indonesia tidak ada salju` · `kenapa kulkas tidak bisa beku` · `kenapa salju tidak turun di indonesia` · `kenapa di indonesia nggak ada salju`
-3. **cegukan** - skor_views v5 127.0 (velocity 2.14, momen -) -> draf: `DRAFT_METADATA_cegukan.md`
-   contoh frasa: `kenapa orang bisa cegukan` · `kenapa cegukan terus` · `kenapa cegukan terus menerus` · `kenapa cegukan tidak berhenti berhenti`
+   contoh frasa: `kenapa di indonesia tidak ada salju` · `kenapa kulkas tidak bisa beku` · `kenapa salju berwarna putih` · `kenapa salju tidak turun di indonesia`
+3. **piramida & mesir** - skor_views v5 125.3 (velocity 3.71, momen -) -> draf: `DRAFT_METADATA_piramida-mesir.md`
+   contoh frasa: `kenapa misteri piramida mesir kuno` · `kenapa piramida berbentuk segitiga` · `kenapa piramida berbentuk segitiga bermuda` · `kenapa piramida dibuat`
 
 ## VELOCITY - permintaan NAIK sejak snapshot terakhir (terbitkan cepat)
-- mata: +8.18 (frasa baru: `kenapa habis nangis mata bengkak`, `kenapa kelopak mata kanan atas kedutan`, `kenapa kelopak mata kiri kedutan terus`, `kenapa kepala tiba tiba pusing dan mata kabur`)
-- baterai & hp: +15.5 (frasa baru: `jika hp sering muncul iklan sendiri`, `kenapa di hp infinix sering muncul iklan sendiri`, `kenapa di hp sering muncul iklan sendiri di hp oppo`, `kenapa di hp sering muncul iklan sendiri di hp realme`)
-- perut & pencernaan: +8.75 (frasa baru: `kalau perut bunyi terus kenapa`, `kenapa babi dan anjing haram bagi islam`, `kenapa kucing tidak mau makan dan muntah`, `kenapa perut bagian bawah sakit sampai ke miss v`)
-- mimpi & tidur: +11.82 (frasa baru: `kalau mimpi hamil pertanda apa`, `kenapa ibu hamil sering kram kaki saat tidur`, `kenapa kepala sering pusing saat bangun tidur`, `kenapa kepala tiba tiba pusing saat bangun tidur`)
-- gigi & mulut: +2.57 (frasa baru: `kenapa gigi kalau ditekan sakit`, `kenapa gigi selalu ngilu`, `kenapa nyamuk menggigit manusia`, `kenapa sering sekali sariawan`)
+- perut & pencernaan: +14.83 (frasa baru: `kalau perut bunyi terus kenapa`, `kenapa anjing dan babi haram bagi islam`, `kenapa babi dan anjing haram bagi islam`, `kenapa gempa bumi bisa menyebabkan tsunami`)
+- mata: +12.59 (frasa baru: `kelopak mata kedutan sebelah kiri atas`, `kenapa habis nangis mata bengkak`, `kenapa mata berair terus sebelah kiri`, `kenapa mata kabur dan perih`)
+- baterai & hp: +16.97 (frasa baru: `cara mengatasi nama wifi tidak muncul di hp`, `kenapa baterai hp cepat habis hp oppo`, `kenapa baterai hp cepat habis hp vivo`, `kenapa baterai smartwatch cepat habis`)
+- gigi & mulut: +4.51 (frasa baru: `kenapa bau mulut padahal sudah gosok gigi`, `kenapa gigi berlubang kadang sakit kadang tidak`, `kenapa gigi berlubang keluar darah kental`, `kenapa gigi berlubang padahal rajin sikat gigi`)
+- kucing: +14.93 (frasa baru: `alasan kenapa macan takut sama kucing`, `kenapa anak kucing mengeong terus`, `kenapa anak kucing tidak mau makan dan lemas`, `kenapa harimau singa macan takut sama kucing`)
 
 ## JENDELA MOMEN TERBUKA (<=45 hari)
-- hujan & awan: puncak musim hujan (38 hari lagi)
-- meteor & komet: Orionids (27 hari lagi)
-- hantu & supranatural: Halloween (37 hari lagi)
+- hujan & awan: puncak musim hujan (17 hari lagi)
+- meteor & komet: Orionids (6 hari lagi)
+- hantu & supranatural: Halloween (16 hari lagi)
+- bulan: Supermoon Beaver (40 hari lagi)

@@ -1,5 +1,5 @@
 # DRAFT METADATA v5 - CEGUKAN
-_Dibuat 2026-09-24 | skor_views v5 127.0 | velocity 2.14 | momen - | status SEGAR_
+_Dibuat 2026-10-15 | skor_views v5 142.4 | velocity 5.71 | momen - | status SEGAR_
 
 ## Judul (pilih satu - urut skor heuristik)
 1. Kenapa Cegukan Terus?  _(skor 4.0)_

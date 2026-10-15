@@ -1,5 +1,5 @@
 # DRAFT METADATA v5 - MENANGIS & EMOSI
-_Dibuat 2026-09-24 | skor_views v5 156.7 | velocity 6.46 | momen - | status SEGAR_
+_Dibuat 2026-10-15 | skor_views v5 171.4 | velocity 9.04 | momen - | status SEGAR_
 
 ## Judul (pilih satu - urut skor heuristik)
 1. Kenapa Nangis?  _(skor 4.0)_
@@ -14,7 +14,7 @@ Jawaban singkatnya ada di video ini - dibuat dari pertanyaan yang
 paling sering diketik orang:
 - Kenapa kau menangis setelah mengetahui identitasku?
 - Kenapa nangis?
-- Kenapa orang koma menangis?
+- Kenapa gampang stres kenapa ya?
 - Kenapa gampang stress?
 
 Isi video ini:
@@ -22,16 +22,16 @@ Isi video ini:
 (isi bab saat produksi)
 
 Ikuti KlikTahu untuk fakta sains & misteri tiap hari!
-#menangis #setelah #gampang #sains #belajar
+#menangis #gampang #setelah #sains #belajar
 ```
 
 ## Hashtag
-#menangis #setelah #gampang #sains #belajar
+#menangis #gampang #setelah #sains #belajar
 
 ## Tag
-kau menangis setelah mengetahui identita, nangis, orang koma menangis, gampang stress, menangis setelah tahu siapa aku, menangis membuat sakit kepala, edukasi sains, klik tahu, fakta sains, short edukasi
+kau menangis setelah mengetahui identita, nangis, gampang stres kenapa ya, gampang stress, menangis setelah tahu siapa aku, menangis bikin sakit kepala, edukasi sains, klik tahu, fakta sains, short edukasi
 
 ## Frasa sumber (real-time autocomplete)
-`kenapa kau menangis setelah mengetahui identitasku` · `kenapa nangis` · `kenapa orang koma menangis` · `kenapa gampang stress` · `kenapa menangis setelah tahu siapa aku` · `kenapa menangis membuat sakit kepala`
+`kenapa kau menangis setelah mengetahui identitasku` · `kenapa nangis` · `kenapa gampang stres kenapa ya` · `kenapa gampang stress` · `kenapa menangis setelah tahu siapa aku` · `kenapa menangis bikin sakit kepala`
 
 _Sumber data: sapuan live CI_

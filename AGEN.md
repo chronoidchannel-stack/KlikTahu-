@@ -19,8 +19,9 @@ rilis otomatis -> pustaka teks siap-tempel.
 
 ## 2. Status terkini (perbarui baris ini setiap selesai episode)
 
-> **MULAI DARI SINI:** keadaan terbaru proyek ada di **§14 (6 Okt 2026 — pindah akun & repo, render tidak lagi
-> di GitHub Actions)**. Catatan rilis Ep24-Ep49 di bawah tetap berlaku sebagai riwayat isi episode.
+> **MULAI DARI SINI:** keadaan terbaru proyek ada di **§15 (15 Okt 2026 — data kanal nyata, standar produksi v12,
+> keputusan Ep50)** dan **§14 (6 Okt 2026 — pindah akun & repo, render tidak lagi di GitHub Actions)**.
+> Catatan rilis Ep24-Ep49 di bawah tetap berlaku sebagai riwayat isi episode.
 
 ### ATURAN KERAS (pelajaran 22 Sep, user marah)
 1. **1 episode = 1 render = 1 rilis.** SEMUA aset (naskah, VO, visual, METADATA.md, pustaka)
@@ -582,3 +583,57 @@ metadata, data analisis) dipindahkan ke repo ini; yang TIDAK ikut: audio mentah 
   topik dari antrean analisis (piramida, lubang hitam Shorts, ular, aurora, es & salju, uban, cegukan, pelangi).
   Tunggu perintah pemilik; untuk episode baru buat `episodes/ep50_<slug>/` + `mesin_v11_ep50.py` (pola Ep43-49)
   lalu render lokal.
+
+---
+
+## 15. SESI 15 OKT 2026 — DATA KANAL NYATA, STANDAR v12, KEPUTUSAN Ep50 (agen Arena)
+
+**Cara kerja agen sekarang (perintah pemilik, wajib):**
+1. **Tidak memakai workspace chat** sebagai tempat kerja. Clone repo ke direktori sementara di luar
+   workspace (mis. `/tmp/kt/repo`), kerjakan, commit, push. Kalau sandbox reset -> clone ulang dari GitHub.
+2. **Hasil jadi (MP4, thumbnail, audio master .m4a, metadata, laporan) dikirim ke Google Drive**
+   folder `KlikTahu_Produksi/` (Shorts/<slug>/, Project_Docs/, Metadata/, Thumbnails/). GitHub hanya kode,
+   naskah, data analisis, dokumen. Token GitHub hanya di `~/.netrc` (tidak pernah di repo/chat).
+3. Video dibuat **dengan mesin repo** (numpy+PIL), **bukan** generator gambar AI.
+4. **Audio ke pemilik tidak pernah WAV**: TTS -> .m4a/.mp3; WAV 48 kHz hanya perantara internal pipeline;
+   deliverable audio = `.m4a` AAC 256k. VO harus utuh (cek integritas), jelas, tanpa potongan.
+5. **Tanpa musik/BGM/instrumental apa pun.** Prioritas audio: VO -> SFX sinematik per BEAT -> ambient halus.
+6. Struktur video wajib 5 babak berurutan: Hook -> Agitation -> Body -> Micro-Climax -> Seamless Loop Outro
+   (frame akhir = frame 0). Rincian lengkap + urutan prioritas yang sudah dikoreksi: **`docs/STANDAR_PRODUKSI_V12.md`**.
+7. Suara VO sesi ini: **voice-00** (sudah dipilih pemilik lewat audisi).
+
+**Data kanal publik @KlikTahu per 15 Okt 2026** (sumber laporan lengkap: `analisis/LAPORAN_15_OKT_2026.md`):
+88 subscriber, 36 Shorts (14 Sep-1 Okt), 40.678 views, rata-rata 1.130/video, 0 video panjang. Tiap video
+berhenti di ~1 rb (lolos uji awal, gagal perluasan) -> masalah retensi 2 detik pertama & tengah video.
+Terbaik: Supermoon 3.243 (129,7/hari), Pesawat mati 1.378 (91,9), Es batu 1.290 (86,0), Bulan Purnama 26 Sep
+2.741 (85,7). Terburuk: Hujan meteor 21-22 Okt yang terbit 14 Sep = 210 views (terlalu awal 5 minggu).
+Temuan: (a) peristiwa langit bertanggal 2-3x views bila terbit H-2/H-3; (b) fisika sehari-hari melawan
+intuisi + taruhan = evergreen terbaik; (c) judul TANPA awalan "Kenapa" 59,5 vs 41,7 views/hari; (d) pertanyaan
+buku teks generik terburuk; (e) pilar: LANGIT 56,3/hari, TEKNOLOGI 53,9, HEWAN 48,3, BUMI 41,5, TUBUH 34,7
+(tapi suka% tertinggi 2,34). `analisis/performa.csv` kini berisi data nyata (views/hari x10, suka).
+Episode repo yang TIDAK ada di kanal: Ep27, 31, 34, 36, 37, 41, 42, 42L, 43, 44; video Drive 7-13 Okt juga
+tidak tampak di kanal publik (tanyakan pemilik: kanal lain / unlisted?).
+
+**Analisis LIVE 15 Okt** (`analisis/STRATEGI_V6.md`, `HASIL_V5.md`, `PEMETA_PELUANG.md`, `HASIL_MENDALAM.md`,
+json bertanggal 20261015): papan v6: serangga 42,2 (pesaing lemah), **ular & reptil 39,6 (celah 0,59, median
+pesaing 157 rb)**, piramida 36,7 (223 rb), burung 34,8, anjing 34,7 (sudut najis -> hindari), lubang hitam 33,5
+(403 rb, kanal sudah 3x), es & salju 33,3, tekanan darah 32,8, pelangi 32,6, cegukan 32,0. Velocity naik:
+baterai +17, kucing +14,9, perut +14,8, hujan & awan +13,6 (momen musim hujan), meteor +19,5 (Orionid).
+Segar: menangis & emosi 171, demam & imun 429 (pemeta), mimisan 299.
+
+**Momentum luar:** BMKG musim hujan mulai pertengahan Okt (merata Nov, El Nino sampai awal 2027);
+BRIN: telur ular menetas Nov-Jan, anak ular masuk rumah, mangsa ramai saat hujan; langit: Orionid 21-22 Okt,
+Leonid 16-17 Nov, Geminid puncak 14 Des, Supermoon 24 Nov & 23/24 Des (verifikasi H-5).
+
+**Keputusan antrean (terbit):** **Ep50 = Ular masuk rumah saat musim hujan** (judul utama: "Ular Masuk Rumah
+Saat Musim Hujan? Bukan Karena Banjir"; 17-18 Okt) -> Ep51 Orionid 21-22 Okt (50-60 s, pakai aset Ep39; terbit
+19-20 Okt) -> Ep52 Piramida bukan budak (24-25 Okt) -> Ep53 Semut muncul sebelum hujan (28-29 Okt) -> Ep54 Hujan
+bikin ngantuk (1-2 Nov) -> Ep55 Habis nangis mata bengkak (5-6 Nov) -> Ep56 Leonid lalu Supermoon (13-14 & 20-21 Nov).
+Target per video: swipe-away <= 35%, persen ditonton >= 70%, loop >= 100%, suka >= 2%, share >= 1%.
+
+**Mesin v12 (akan dibuat untuk Ep50, lihat §8 standar):** `morph()`, `anchor_out/anchor_in` + transisi `match`,
+`depth` parallax 3 lapis, `ease_v12` (antisipasi/overshoot <= 8%/settle) + `follow()`, BEAT tingkat kata (port
+`align()` Long), `energi` per babak, `hold`, `sc_outro_loop`, SFX tambahan (whoosh berarah, reveal, morph, tick,
+thump, riser, tetes, retak, hujan, angin, room tone), QC baru (`qc_audio.py`, `qc_sync.py`, `check_layout --beban`,
+`qc_mp4 --loop`). Semua wajib punya `--uji`; render tetap lokal di sandbox (background), bukan Actions.
+
