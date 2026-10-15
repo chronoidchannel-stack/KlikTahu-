@@ -749,3 +749,9 @@ outro) harus digambar dengan primitif mentah (`V._stiker11`) tanpa faktor KELUAR
 lagi (kedip). (c) Durasi v2 123,7 s -> VBITRATE 5900k agar mp4 < 100 MB (batas `upload_file`); di atas itu perlu
 `initiate_resumable_upload`. (d) Semua 62 CUE kata terselesaikan dari `kata.json` (periksa dengan skrip kecil: tidak boleh
 ada fallback fraksi sebelum render).
+(e) `qc_mp4.py` kini sadar v12 (`KT_VO_CHAIN=v12`): kepala VO boleh sampai lead_in + 0,12 + 0,55 s (napas alami
+dipertahankan, kata pertama diverifikasi ASR) dan rentang aktif dibanding naskah - 0,47 s (pra/pasca-gulir ruangan
+-63 dBFS tidak terdeteksi ambang -40 dB). Tanpa ini render v12 selalu "PERIKSA" palsu dan `render_lokal.sh` keluar 1
+meski mp4 sudah ada di `dist/`. **Ep50 v2 FINAL 15 Okt 17.00 UTC:** 123,75 s, 94,4 MB (6104 kb/s), korelasi audio
+0,9999, peak -2,0 dBFS, loop 0,988, QC SEMUA BERSIH; Drive `KlikTahu_Ep50_Orionid_v2.mp4` + `_master.m4a` +
+`Ep50_SIAP_TEMPEL_v2.md`; v1 dipindah ke `Ep50_Orionid/arsip_v1/`.

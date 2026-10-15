@@ -158,3 +158,11 @@ Semua tambahan disertai `--uji` (selftest) sesuai aturan repo; tidak ada render 
 8. Judul tidak diawali "Kenapa" (bukti data kanal sendiri).
 9. Durasi rekomendasi 90-120 s untuk uji format loop (aturan durasi bebas <= 178 s tetap berlaku).
 10. Target angka retensi per video dan aturan keputusan (lanjut seri / perbaiki hook).
+
+### Tambahan 15 Okt 2026 (malam) - hasil remake Ep50 v2
+- Napas alami sebelum kalimat pertama **dipertahankan** (0,1-0,5 s setelah pra-gulir). Jangan dipangkas: inilah yang
+  membuat VO terdengar manusiawi; QC keutuhan kata = ASR (`build/vo_qc.json`), bukan ambang energi.
+- Setiap label teks harus memudar bersama elemen induknya (alpha `paste_c/paste_r` kini berfungsi); elemen yang
+  memang persisten lintas adegan digambar tanpa faktor KELUAR.
+- Sebelum render penuh: (1) semua CUE terselesaikan dari `kata.json`; (2) lembar batas +-0,08 s di 6 batas;
+  (3) sapuan 1/3 s SS 0,5 tanpa error; (4) proyeksi ukuran = bitrate x durasi < 100 MB.

@@ -169,8 +169,18 @@ def main():
         jeda = sc["dur"] - (head + aktif)
         harap = sc.get("vo_dur") or 0
         beda = abs(aktif - harap) if harap else 0
-        ok = (head < lead_in + 0.35 and tail > 0.02 and jeda > 0.10
-              and (not harap or beda < 0.35))
+        # v12 (vo_manusia): klip berisi pra-gulir 0.12 s + napas alami + ekor 0.35 s ruangan
+        # (-63 dBFS, di bawah ambang -40 dB). Keutuhan kata pertama/terakhir sudah
+        # diverifikasi ASR di build/vo_qc.json, jadi di sini yang dicek: VO mulai
+        # <= lead_in + 0.12 + napas 0.55 s, dan rentang aktif = naskah - (0.47 +- 0.35).
+        v12 = os.environ.get("KT_VO_CHAIN", "").lower() == "v12"
+        if v12:
+            beda = abs(aktif - (harap - 0.47)) if harap else 0
+            ok = (head < lead_in + 0.12 + 0.55 and tail > 0.02 and jeda > 0.10
+                  and (not harap or beda < 0.35))
+        else:
+            ok = (head < lead_in + 0.35 and tail > 0.02 and jeda > 0.10
+                  and (not harap or beda < 0.35))
         print(f"  {sc['id']:6s} VO mulai +{head:.2f}s (lead_in {lead_in:.2f} → "
               f"selisih {telat:+.2f}s), durasi VO {aktif:.2f}s (naskah {harap:.2f}s, "
               f"beda {beda:.2f}s), ekor {tail:.2f}s, {'OK' if ok else 'PERIKSA ✘'}")
