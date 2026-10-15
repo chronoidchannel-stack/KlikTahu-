@@ -298,18 +298,87 @@ def angin(d=1.2):
     return _norm(x * env, 0.6)
 
 
+# ------------------------------------------------------------------ v12 (standar KONTINUITAS)
+def morph(d=0.46):
+    """Perubahan bentuk: sapuan derau halus + glide sinus 320->620 Hz (bukan nada musikal, sekali lewat)."""
+    t = _t(d)
+    u = t / d
+    f = 320 + 300 * np.sin(np.pi * u / 2) ** 1.5
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    x = 0.55 * np.sin(ph) * np.exp(-((u - 0.45) / 0.30) ** 2)
+    x += 0.7 * _bp(_noise(d), 900 + 1800 * np.sin(np.pi * u), 1.1) * np.sin(np.pi * u) ** 1.4
+    return _norm(x, 0.7)
+
+
+def burn(d=0.62):
+    """Meteor terbakar: desis derau band-pass turun 7 kHz -> 1,2 kHz dengan ekor memudar."""
+    t = _t(d)
+    u = t / d
+    fc = 1200 + 5800 * (1 - u) ** 1.6
+    x = _bp(_noise(d), fc, 1.6)
+    env = np.minimum(1.0, t / 0.02) * (1 - u) ** 1.3
+    return _norm(x * env, 0.8)
+
+
+def thump(d=0.55):
+    """Hentakan rendah 70 -> 48 Hz (payoff micro-climax) + klik transien halus."""
+    t = _t(d)
+    f = 48 + 22 * np.exp(-t / 0.09)
+    ph = 2 * np.pi * np.cumsum(f) / SR
+    x = np.sin(ph) * np.exp(-t / 0.16)
+    x += 0.25 * _lp(_noise(d), 1800) * np.exp(-t / 0.012)
+    return _norm(x, 0.9)
+
+
+def angin_malam(d=8.0, seed=5):
+    """Tekstur ambient malam (bukan musik): derau sangat lembut yang bernapas pelan, untuk bed -32 dB."""
+    rng = np.random.default_rng(seed)
+    n = int(SR * d)
+    t = np.arange(n) / SR
+    x = _lp(rng.standard_normal(n), 420) * 0.8 + _bp(rng.standard_normal(n), 900, 0.9) * 0.25
+    napas = 0.75 + 0.25 * np.sin(2 * np.pi * 0.09 * t) * np.sin(2 * np.pi * 0.031 * t + 1.0)
+    return _norm(x * napas, 0.6)
+
+
+def ambient_bed(total, db=-32.0, fade=0.02, seed=5):
+    """Bed ambient sepanjang `total` detik: potongan 8 s disambung crossfade 0,5 s; level sama di
+    awal & akhir (loop mulus), fade zero-ish 20 ms di kedua ujung."""
+    seg_ = angin_malam(8.0, seed)
+    n = int(SR * total)
+    out = np.zeros(n + len(seg_))
+    xf = int(SR * 0.5)
+    pos = 0
+    k = 0
+    while pos < n:
+        chunk = seg_.copy() if k % 2 == 0 else seg_[::-1].copy()
+        if pos > 0:
+            ramp = np.linspace(0, 1, xf)
+            chunk[:xf] *= ramp
+            out[pos:pos + xf] *= (1 - ramp)
+        out[pos:pos + len(chunk)] += chunk
+        pos += len(chunk) - xf
+        k += 1
+    out = out[:n] * (10 ** (db / 20))
+    nf = int(SR * fade)
+    out[:nf] *= np.linspace(0, 1, nf)
+    out[-nf:] *= np.linspace(1, 0, nf)
+    return out
+
+
 KATALOG = {"whoosh": whoosh, "swish": swish, "swish_up": swish_up, "pop": pop, "tick": tick,
            "click": click, "impact": impact, "thud": thud, "boom": boom, "riser": riser,
            "ding": ding, "glitch": glitch, "zap": zap, "door": door, "nging": nging,
            "retak": retak, "kecapi": kecapi, "kilau": kilau,
            "gelembung": gelembung, "gigit": gigit, "guntur": guntur, "detak": detak,
-           "laser": laser, "angin": angin}
+           "laser": laser, "angin": angin,
+           "morph": morph, "burn": burn, "thump": thump}
 # level relatif (dB) supaya campuran seimbang
 LEVEL = {"whoosh": -3, "swish": -4, "swish_up": -8, "pop": -5, "tick": -9, "click": -7,
          "impact": 0, "thud": -3, "boom": -1, "riser": -6, "ding": -8, "glitch": -7,
-         "zap": -9, "door": -4, "nging": -14, "retak": -8, "kecapi": -6, "kilau": -10,
+         "zap": -9, "door": -4, "nging": -14, "retak": -8, "kecapi": -6, "kilau": -7,
          "gelembung": -9, "gigit": -4, "guntur": -3, "detak": -2,
-         "laser": -9, "angin": -8}
+         "laser": -9, "angin": -8,
+         "morph": -7, "burn": -4, "thump": 0}
 _CACHE = {}
 
 

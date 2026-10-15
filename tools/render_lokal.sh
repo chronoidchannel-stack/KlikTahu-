@@ -78,6 +78,10 @@ echo "--- process_audio.py (rapikan VO + QC keutuhan)"
 SPEED="$SPEED" TARGET_WPS="${TARGET_WPS:-1.90}" python3 process_audio.py
 echo "--- build_timeline.py"
 MAXDUR="${MAXDUR:-180}" python3 build_timeline.py
+if python3 -c 'import json,sys; sys.exit(0 if str(json.load(open("content.json")).get("mesin","")).lower()=="v12" else 1)'; then
+  echo "--- align_kata.py (v12: BEAT dikunci ke kata)"
+  python3 align_kata.py
+fi
 echo "--- build_audio.py"
 SPEED="$SPEED" python3 build_audio.py
 echo "--- master_audio.py (loudnorm + SFX)"

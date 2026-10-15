@@ -34,6 +34,20 @@
 
 ---
 
+## Ep50 - Hujan Meteor Orionid 21-22 Oktober: Jam Berapa & Arah Mana (Tanpa Teleskop)
+- Video: `KlikTahu_Ep50_Orionid.mp4` - 1080x1920 - 60 fps (116.8 s) - diserahkan via Google Drive
+  `KlikTahu_Produksi/Shorts/kliktahu-ep50-orionid-2026/` (mp4 + thumbnail.jpg + audio master .m4a + SIAP_TEMPEL.md)
+- Teks siap tempel (judul, deskripsi, hashtag, tag, struktur 5 babak, catatan unggah): `pustaka/Ep50_Orionid/SIAP_TEMPEL.md`
+- Metadata ringkas: `episodes/ep50_orionid/METADATA.md`; naskah + cue visual: `episodes/ep50_orionid/content.json`
+- Orisinal: episode pertama **mesin v12 KONTINUITAS** (`mesin_v12.py` + `mesin_v12_ep50.py`): satu sistem visual
+  (cakram langit + cakrawala + chip tanggal) dari frame 0 sampai akhir, transisi morph (kalender -> jam -> kompas,
+  langit -> peta orbit -> langit), 70 SFX dikunci ke kata (faster-whisper), ambient angin malam, loop frame akhir = frame 0.
+- Jadwal terbit: Senin 19 Okt 2026 18.30-20.30 WIB (puncak Orionid malam Rabu 21 -> Kamis 22 Okt).
+
+## Ep51 (antre) - Ular Masuk Rumah Saat Musim Hujan? Bukan Karena Banjir
+- VO 8 klip sudah jadi (`episodes/ep51_ular_rumah/audio_raw/`), naskah `content.json`, teks `pustaka/Ep51_Ular_Rumah/SIAP_TEMPEL.md`.
+- Belum dirender; butuh `mesin_v12_ep51.py`. Target terbit 24-26 Okt 2026.
+
 ## Ep49 - Kenapa Bintang Berkedip, Tapi Planet Tidak?
 - Video: rilis `KlikTahu_Ep49_Bintang-76` (Latest, run 36022773282) - aset `KlikTahu_Ep49_Bintang.mp4` - 1080x1920 - 60 fps (158.8 s)
 - Teks siap tempel (judul, deskripsi, tag, komentar): `pustaka/Ep49_Bintang/SIAP_TEMPEL.md`

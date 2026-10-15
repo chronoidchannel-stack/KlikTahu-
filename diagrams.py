@@ -368,7 +368,7 @@ def line_on(img, p1, p2, color, width, alpha=1.0, dash=None):
 
 
 def dot_on(img, cx, cy, r, color, alpha=1.0, outline=None, width=3):
-    if alpha <= 0.01:
+    if alpha <= 0.01 or r <= 0:
         return
     bx = _box(img, cx - r - width, cy - r - width, cx + r + width, cy + r + width)
     if bx is None:

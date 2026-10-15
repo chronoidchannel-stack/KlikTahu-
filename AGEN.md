@@ -579,7 +579,7 @@ metadata, data analisis) dipindahkan ke repo ini; yang TIDAK ikut: audio mentah 
   (selftest semua visual), `sfx.py` (24 bunyi), `analisis/{pemeta_peluang,mesin_v5,mesin_v6,sapuan_mendalam}.py --uji`.
 - Lisensi repo: hak cipta dilindungi (`LICENSE`). Atribusi pihak ketiga: font Poppins (SIL OFL 1.1) dan
   citra M87* EHT (CC BY 4.0) -> `docs/ATTRIBUSI.md`.
-- **Belum ada episode baru setelah Ep49 / Long02.** Episode berikutnya: **Ep50** (Shorts) dan **Long03**,
+- **(Usang, lihat §15-16: Ep50 Orionid diproduksi 15 Okt 2026 dengan mesin v12.)** Episode berikutnya: **Ep51** (Shorts) dan **Long03**,
   topik dari antrean analisis (piramida, lubang hitam Shorts, ular, aurora, es & salju, uban, cegukan, pelangi).
   Tunggu perintah pemilik; untuk episode baru buat `episodes/ep50_<slug>/` + `mesin_v11_ep50.py` (pola Ep43-49)
   lalu render lokal.
@@ -631,7 +631,51 @@ Saat Musim Hujan? Bukan Karena Banjir"; 17-18 Okt) -> Ep51 Orionid 21-22 Okt (50
 bikin ngantuk (1-2 Nov) -> Ep55 Habis nangis mata bengkak (5-6 Nov) -> Ep56 Leonid lalu Supermoon (13-14 & 20-21 Nov).
 Target per video: swipe-away <= 35%, persen ditonton >= 70%, loop >= 100%, suka >= 2%, share >= 1%.
 
-**Mesin v12 (akan dibuat untuk Ep50, lihat §8 standar):** `morph()`, `anchor_out/anchor_in` + transisi `match`,
+**REVISI 15 Okt (malam, keputusan pemilik "Ya! Ubah judul/topik!"):** **Ep50 = Hujan Meteor Orionid 21-22 Okt**
+(terbit Senin 19 Okt 18.30-20.30 WIB) dan **Ep51 = Ular masuk rumah** (VO sudah jadi, folder `episodes/ep51_ular_rumah/`,
+terbit 24-26 Okt). Alasan: peristiwa bertanggal H-2 bernilai 2-3x views; Orionid 14 Sep gagal karena 5 minggu terlalu dini.
+
+## 16. SESI 15 OKT 2026 (lanjutan) — MESIN v12 KONTINUITAS DIBANGUN, Ep50 ORIONID DIPRODUKSI
+
+**Berkas baru (semua punya selftest `python3 <file>`):**
+- `mesin_v12.py` — inti v12: `t_kata/cues` (cue kata dari `build/kata.json`), `ease12/follow/esm/eio`, `morph`+`bentuk_*`,
+  `kamera()` kontinu (nol di t=0 & t=total -> loop), `aksen_pada()` (warna aksen dicampur melintasi adegan),
+  `loop_blend(meta)`, primitif `cakram_langit/garis_meteor/komet/jam/kompas/chip/label/silang/elips_pts/polyline_on`,
+  registry `EVENTS12` (visual -> fungsi event SFX).
+- `mesin_v12_ep50.py` — 7 adegan Ep50 (`komet50, salahjam50, debu50, jam50, arah50, orbit50, loop50`), dict `CUES`
+  (kata kunci per adegan), `SFX` (bunyi per kata), `BEATS50`, `events_v12(sc)`, `daftar()` (mendaftar sendiri ke
+  `mesin_v11.BEATS`, `diagrams.VISUALS`, `mesin_v12.EVENTS12`; aman terhadap impor melingkar).
+- `align_kata.py` — faster-whisper `small` (CPU) -> `build/kata.json` (waktu kata per adegan, sudah ditambah lead_in).
+  WAJIB memberi array numpy float32 16 kHz (PyAV yang terpasang menolak `transcribe(path)`). `pip install faster-whisper`
+  dilakukan di sandbox (tidak masuk requirements.txt agar Actions tetap ringan; render_lokal.sh memanggilnya hanya untuk v12).
+- `qc_loop.py` — korelasi frame terakhir vs frame 0 (>= 0,98).
+- `sfx.py` +`morph`, `burn`, `thump`, `angin_malam`/`ambient_bed` (bed ambient, bukan musik).
+
+**Perubahan mesin lama (kompatibel mundur, hanya aktif bila `content.json` punya `"mesin": "v12"`):**
+`render.py`: `_is_v12(meta)`; mesh seed tetap + `aksen_pada`; tidak ada dorongan zoom per adegan; `_finish` memakai
+`mesin_v12.kamera`; `draw_outro` memanggil `VISUALS[sc.visual]` bila ada; transisi `match/morph/hold` = tanpa crossfade;
+akhir video tanpa fade krem, diganti `loop_blend` ke frame 0; meta `mesin`/`v12` diteruskan dari content.json.
+`mesin_v11.events()`: adegan v12 memakai `EVENTS12` (semua SFX dari cue kata). `master_audio.py`: v12 -> dasar SFX -10 dB
+(impact/thump puncak ~ -18 dBFS sebelum duck) + bed ambient -32 dB (`KT_AMBIENT_BED=0` untuk mematikan).
+`tools/render_lokal.sh`: menjalankan `align_kata.py` setelah `build_timeline.py` untuk v12.
+
+**Pelajaran Ep50:** TTS voice-00 dengan `TARGET_WPS=2.05 ATEMPO_MIN=0.93` (1.90 membuat VO terseret); hook teks harus
+tampil <= 0,35 s; glyph `→`/`≈` tidak ada di Poppins (pakai kata); elemen baris alat Y_ALAT 1535 agar dasar <= 1625;
+label jam di ATAS jam; orbit di luar cakram harus diklip; kontinuitas antar adegan dicek dengan nilai alpha/gelap/bintang
+yang sama persis di akhir adegan N dan awal adegan N+1 (atau di-ease 0,6-1,0 s).
+
+**Pelajaran render Ep50 (3x render ulang, 75 menit per render di sandbox 2 vCPU):**
+1. `render._finish` memanggil `draw_streak()` = tiga pita miring generik di SETIAP batas adegan -> kini dimatikan untuk v12.
+   Selalu periksa frame -0,08 s / +0,08 s di tiap batas adegan SEBELUM render penuh (`build/qc/batas.jpg`).
+2. `ease12()` punya antisipasi NEGATIF -> jangan dipakai langsung sebagai radius/alpha (`max(0, ...)`/`clamp`);
+   `diagrams.dot_on/ring_on` kini menolak r <= 0. Uji cepat semua frame per 0,25 s pada SS 0,5 (5 menit) sebelum render.
+3. `_glow11` lama: `radial_gradient` bernilai 128 di tepi sisi -> alpha tidak nol -> kotak terlihat di latar gelap (diperbaiki).
+4. Ekor komet = sprite gradasi ter-cache (bukan rangkaian titik).
+5. Elemen non-persisten WAJIB keluar sebelum batas adegan: `mesin_v12.set_keluar(tl, dur)` di awal fungsi adegan +
+   pembungkus `chip/label/stiker/bab/jam/kompas/silang/teks` mengalikan `KELUAR[0]`; primitif mentah dikalikan manual;
+   `chip(..., persisten=True)` untuk elemen yang memang tetap (chip tanggal). `meteor_acak` berhenti 0,5 s sebelum batas.
+
+**Mesin v12 (rencana awal, sebagian sudah terwujud di atas):** `morph()`, `anchor_out/anchor_in` + transisi `match`,
 `depth` parallax 3 lapis, `ease_v12` (antisipasi/overshoot <= 8%/settle) + `follow()`, BEAT tingkat kata (port
 `align()` Long), `energi` per babak, `hold`, `sc_outro_loop`, SFX tambahan (whoosh berarah, reveal, morph, tick,
 thump, riser, tetes, retak, hujan, angin, room tone), QC baru (`qc_audio.py`, `qc_sync.py`, `check_layout --beban`,

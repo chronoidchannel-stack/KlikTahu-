@@ -53,13 +53,32 @@ def tambah_sfx(a, sr):
         print("  SFX: tidak ada event v11 (episode lama) - dilewati")
         return a
     vo = a.mean(axis=1)
-    lay = sfx.duck(sfx.lapisan(ev, len(vo) / sr, float(os.environ.get("KT_SFX_DB", "-16"))), vo)
+    try:
+        _cj = json.load(open(os.path.join(BASE, "content.json")))
+    except Exception:                      # noqa: BLE001
+        _cj = {}
+    _v12 = str(_cj.get("mesin", "")).lower() == "v12"
+    # v12: SFX sinematik lebih hadir (-10 dB dasar; impact/thump puncak ~ -18 dBFS), tetap di bawah VO lewat duck -7 dB
+    lay = sfx.duck(sfx.lapisan(ev, len(vo) / sr, float(os.environ.get("KT_SFX_DB", "-10" if _v12 else "-16"))), vo)
     lay = lay[: len(vo)]
     if len(lay) < len(vo):
         lay = np.pad(lay, (0, len(vo) - len(lay)))
     out = a.copy()
     out[:, 0] += lay * 0.96
     out[:, 1] += lay * 1.00
+    # v12: tekstur ambient halus (angin malam) di bawah segalanya - bukan musik; level sama di awal/akhir
+    try:
+        cj = json.load(open(os.path.join(BASE, "content.json")))
+    except Exception:                      # noqa: BLE001
+        cj = {}
+    if str(cj.get("mesin", "")).lower() == "v12" and os.environ.get("KT_AMBIENT_BED", "1") == "1":
+        bed = sfx.ambient_bed(len(vo) / sr, float(os.environ.get("KT_AMBIENT_DB", "-32")))
+        bed = bed[: len(vo)]
+        if len(bed) < len(vo):
+            bed = np.pad(bed, (0, len(vo) - len(bed)))
+        out[:, 0] += bed
+        out[:, 1] += bed
+        print(f"  ambient v12: angin malam {float(os.environ.get('KT_AMBIENT_DB', '-32')):.0f} dB, {len(bed) / sr:.1f} s")
     # limiter lembut: tekan hanya puncak yang melewati -1.2 dBFS
     lim = 10 ** (TARGET_PEAK / 20)
     pk = np.abs(out).max(axis=1)

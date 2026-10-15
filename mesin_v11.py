@@ -236,7 +236,9 @@ def _glow11(img, cx, cy, r, col, alpha):
     if spr is None:
         n = max(8, int(S(r) * 2))
         m = Image.radial_gradient("L").resize((n, n), Image.BICUBIC)
-        m = m.point(lambda v: int(255 * (1 - v / 255.0) ** 2.2))
+        # v12 fix: radial_gradient bernilai 128 di tepi tengah sisi (bukan 255) -> alpha harus 0 pada lingkaran
+        # dalam, kalau tidak tepi kotak sprite terlihat di atas latar gelap
+        m = m.point(lambda v: int(255 * max(0.0, 1 - v / 128.0) ** 2.2))
         spr = (Image.new("RGB", (n, n), col), m)
         _GLOW[key] = spr
     rgb, m = spr
@@ -521,6 +523,17 @@ def events(scenes):
     for i, sc in enumerate(scenes):
         st, dur = sc["start"], sc["dur"]
         tr = str(sc.get("trans") or "").lower()
+        try:
+            import mesin_v12 as _M12v
+            fn12 = _M12v.EVENTS12.get(sc.get("visual", ""))
+        except Exception:                      # noqa: BLE001
+            fn12 = None
+        if fn12:
+            # v12: semua event dari CUE kata (satu sumber kebenaran untuk gambar + SFX)
+            ev += fn12(sc)
+            if sc.get("type") == "fact" and sc.get("badge"):
+                ev.append((st + 0.12, "swish_up", 0.55))
+            continue
         if i > 0:
             if tr == "punch":
                 ev += [(st - 0.30, "whoosh", 0.8), (st - 0.02, "impact", 0.7)]
@@ -1152,6 +1165,9 @@ if __name__ != "__main__":       # saat dijalankan langsung, __main__ memuat ula
     VISUALS11.update(_E49.VISUALS49)
 VISUALS11 = {k: (v if k.startswith("intro") else _geser(v)) for k, v in VISUALS11.items()}
 D.VISUALS.update(VISUALS11)
+# v12 KONTINUITAS: modul episode v12 mendaftar sendiri (BEATS/VISUALS/EVENTS12 lewat daftar()),
+# tanpa _geser; impor di sini hanya memastikan modul termuat (aman terhadap impor melingkar)
+import mesin_v12_ep50  # noqa: E402,F401
 
 
 def _selftest():

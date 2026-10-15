@@ -68,7 +68,7 @@ Kesunyian strategis: setelah setiap reveal besar, kamera diam 0,6-1,0 s, VO jeda
 - **Easing**: antisipasi (mundur 6-8% selama 100-140 ms) -> akselerasi -> deselerasi (quintic) -> overshoot <= 8% -> settle. Elemen anak mengikuti elemen induk dengan lag 60-90 ms (secondary motion).
 - **Tipografi kinetik**: kata muncul saat diucapkan; kata sorot lebih besar 15% + warna aksen; maks 2 baris, 7 kata; tidak ada teks di y > 1640 atau kolom tombol kanan (x > 950, y 1100-1700).
 - **Hierarki**: satu titik fokus per saat; fokus berikutnya muncul <= 25% lebar layar dari fokus sebelumnya, atau dipandu garis/partikel (panduan perhatian).
-- **Metafora visual** ditetapkan di naskah per episode (contoh Ep50: tetes hujan -> telur -> kepala ular; kalender sebagai lingkaran yang menutup ke hujan lagi).
+- **Metafora visual** ditetapkan di naskah per episode (contoh Ep51 ular: tetes hujan -> telur -> kepala ular; contoh Ep50 Orionid: kalender -> jam -> kompas, langit -> peta orbit -> langit).
 - **Tanpa animasi dekoratif**: tiap gerakan wajib menjawab "apa fungsinya?" (memandu mata, menunjukkan sebab-akibat, menandai waktu, menegaskan kata). Jika tidak ada jawaban, hapus.
 
 ---

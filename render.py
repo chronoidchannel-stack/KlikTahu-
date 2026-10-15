@@ -6,6 +6,7 @@ import diagrams
 import mesin_util
 import mesin_v11   # v11: adegan + transisi punch/slide/glitch + beat kamera (mendaftar ke diagrams.VISUALS)
 import mesin_fx                     # FX 2026: finishing sinematik, blur gerak, derau kamera
+import mesin_v12                    # v12 KONTINUITAS: kamera kontinu, aksen campur, loop, cue kata
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 BUILD = os.environ.get("KT_BUILD") or os.path.join(BASE, "..", "build")
@@ -1356,6 +1357,9 @@ def draw_intro(img, d, sc, tl, dur, tg):
 def draw_outro(img, d, sc, tl, dur, tg):
     accent = hexc(sc["accent"])
     al = 1 - eo(seg(tl, dur - 0.3, dur))
+    if sc.get("visual") in diagrams.VISUALS:          # v12: outro loop digambar modul episode
+        diagrams.VISUALS[sc["visual"]](img, d, sc, tl, dur, tg, accent, al, 0.0)
+        return
     sA = fit_size(FB, sc["lines"][0], 96, 900)
     fA = font(FB, sA)
     q = seg(tl, 0.08, 0.6)
@@ -1476,6 +1480,10 @@ def _wipe_img(prev, new, p, soft=0.14):
     return Image.composite(new, prev, m)
 
 
+def _is_v12(meta):
+    return str((meta or {}).get("mesin", "")).lower() == "v12"
+
+
 def _scene_index(tl, scenes):
     for i, s in enumerate(scenes):
         if tl < s["start"] + s["dur"] or s is scenes[-1]:
@@ -1493,11 +1501,14 @@ def _content_image(tl, total, scenes, meta):
     sc = scenes[i]
     t = tl - sc["start"]
     accent = hexc(sc["accent"])
+    v12 = _is_v12(meta)
     if FX_ON:
         # v2026: latar MESH GRADIENT bergerak (aksen adegan + hangat + sejuk) menggantikan krem datar
+        # v12: seed tetap + aksen dicampur melintasi batas adegan -> latar tidak pernah melompat
+        acc_m = mesin_v12.aksen_pada(tl, scenes) if v12 else accent
         img = mesin_fx.mesh_latar(int(S(W)), int(S(H)), tl, CREAM,
-                                  [accent, (250, 196, 150), (160, 196, 232), accent],
-                                  [0.16, 0.10, 0.07, 0.08], seed=3 + i % 5, cahaya=0.035)
+                                  [acc_m, (250, 196, 150), (160, 196, 232), acc_m],
+                                  [0.16, 0.10, 0.07, 0.08], seed=3 if v12 else 3 + i % 5, cahaya=0.035)
     else:
         img = Image.new("RGB", (int(S(W)), int(S(H))), CREAM)
     d = ImageDraw.Draw(img)
@@ -1509,6 +1520,8 @@ def _content_image(tl, total, scenes, meta):
         draw_intro(img, d, sc, t, sc["dur"], tl)
     else:
         draw_outro(img, d, sc, t, sc["dur"], tl)
+    if v12:
+        return img                    # v12: kamera kontinu di _finish (tidak ada reset zoom per adegan)
     # kamera push: sedikit zoom-out tiap scene supaya frame terasa hidup
     prog = eio(clamp(t / max(0.1, sc["dur"])))
     z = 1.0 + 0.060 * (1.0 - prog)      # elemen tampil lebih besar di layar tegak
@@ -1623,7 +1636,14 @@ def _finish(img, tl, total, scenes, meta):
     global SCENES_REF
     SCENES_REF = [s["start"] for s in scenes]
     cam = float(os.environ.get("KT_CAM", "1"))
-    if cam > 0:
+    v12 = _is_v12(meta)
+    if v12 and cam > 0:
+        k12, dx12, dy12 = mesin_v12.kamera(tl, total, scenes, meta, _beats(scenes))
+        img = _camera(img, k12, S(dx12), S(dy12))
+        pk = mesin_v11.punch_kamera(tl, _beats(scenes))
+        if pk > 0.008 and FX_ON:
+            img = mesin_fx.zoom_blur(img, pk * 1.1, 0.5, 0.46, n=3)
+    elif cam > 0:
         # v3: dorongan dua fase (masuk cukup cepat, lalu hanyut pelan) + napas kamera
         # halus supaya frame tidak pernah terasa beku; arah geser bergantian per adegan
         p = clamp((tl - sc["start"]) / max(0.4, sc["dur"]))
@@ -1646,8 +1666,10 @@ def _finish(img, tl, total, scenes, meta):
                           amp * 0.7 * sh * math.sin(tl * 29.0 + 1.1))
     d = ImageDraw.Draw(img)
     draw_header(img, d, sc, total, tl, accent, meta)
-    draw_streak(img, d, scenes, tl)
-    if os.environ.get("KT_AMBIENT", "1") == "1":
+    if not v12:
+        # pita 'whoosh' generik di tiap batas adegan: DILARANG di v12 (transisi harus punya logika visual)
+        draw_streak(img, d, scenes, tl)
+    if os.environ.get("KT_AMBIENT", "1") == "1" and not v12:
         # v6: napas drift global - frame terpana bergeser/bernapas pelan terus
         # (jebakan "frame diam"; standar video edukasi modern)
         pz = 1.0 + 0.0135 * (0.5 + 0.5 * math.sin(tl * 0.20))
@@ -1828,8 +1850,10 @@ def render_frame(tl, total, scenes, meta, out_path):
     xf = float(os.environ.get("KT_XFADE", "0.52"))
     i = _scene_index(tl, scenes)
     st = scenes[i]["start"]
-    if xf > 0.01 and i > 0 and tl < st + xf:
+    mode0 = str(scenes[i].get("trans") or "").lower() if i > 0 else ""
+    if xf > 0.01 and i > 0 and tl < st + xf and mode0 not in ("match", "morph", "hold"):
         # konten adegan sebelumnya dibekukan tepat di ujungnya, lalu berpindah ke adegan baru
+        # (v12: match/morph/hold = kontinuitas murni, elemen berubah bentuk di dalam adegan, tanpa blend)
         p = (tl - st) / xf
         k = diagrams.esmooth(p)
         mode = str(scenes[i].get("trans") or os.environ.get("KT_TRANS", "fade")).lower()
@@ -1971,6 +1995,16 @@ def render_frame(tl, total, scenes, meta, out_path):
             else:
                 img = Image.blend(prev, img, k)
     img = _finish(img, tl, total, scenes, meta)
+    if _is_v12(meta):
+        # v12: LOOP - frame akhir dicampur ke frame 0 (latar/kedip bintang menyatu; adegan outro
+        # sudah mengembalikan state frame 0), tanpa fade ke krem
+        lb = mesin_v12.loop_blend(meta)
+        if lb > 0.01 and tl > total - lb:
+            k0 = diagrams.esmooth((tl - (total - lb)) / lb)
+            img0 = _finish(_content_image(0.0, total, scenes, meta), 0.0, total, scenes, meta)
+            img = Image.blend(img, img0, k0)
+        img.save(out_path)
+        return
     ef = float(os.environ.get("KT_ENDFADE", "0.40"))
     if ef > 0.01 and tl > total - ef:
         k = diagrams.esmooth((tl - (total - ef)) / ef)
@@ -2017,7 +2051,9 @@ def main():
                 sc[k] = v
         for k, v in ({"header_badge": content.get("header_badge"),
                       "brand": content.get("channel", "KlikTahu"),
-                      "bg_element": content.get("bg_element", "none")}).items():
+                      "bg_element": content.get("bg_element", "none"),
+                      "mesin": content.get("mesin"),            # v12: kamera kontinu + loop
+                      "v12": content.get("v12")}).items():
             if v is not None:
                 meta[k] = v
         if asing:

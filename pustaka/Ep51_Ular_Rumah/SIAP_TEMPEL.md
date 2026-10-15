@@ -1,4 +1,4 @@
-# SIAP TEMPEL - Ep50 Ular Masuk Rumah (salin ke YouTube Studio)
+# SIAP TEMPEL - Ep51 Ular Masuk Rumah (ditunda dari Ep50; Ep50 = Orionid) (salin ke YouTube Studio)
 **Judul video:** Ular Masuk Rumah Saat Musim Hujan? Bukan Karena Banjir
 **Tanggal produksi:** 15 Oktober 2026 - **Target durasi:** 100-120 s - 1080x1920 - 60 fps - VO pria (TTS Arena voice-00, master .m4a), tanpa subtitle, SFX sintetis + ambient hujan halus, TANPA musik - **standar produksi v12** (5 babak + loop mulus)
 
